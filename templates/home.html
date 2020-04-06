@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Flask Image Boards</title>
+    </head>
+    <body>
+        <h1>Boards</h1>
+        {% for board in boards %}
+            <ul>
+                <a href="/{{board.board_acronym}}">
+                    {{ "/"+board.board_acronym +"/  - "+ board.board_description}}
+                </a>
+            </ul>
+        {% endfor %}
+    </body>
+</html>

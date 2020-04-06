@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{board_acronym}}</title>
+    </head>
+    <body>
+        <h1>{{board_acronym}}</h1>
+        <div>
+            <h3>Create Post:</h3>
+            <form method="POST" action="/{{board_acronym}}/post">
+                post: <textarea type="text" name="post_text" rows="4" cols="50"></textarea>
+                image: not implemented yet
+                <input type="submit" value="post">
+            </form>
+        </div>
+        <div>
+            <h3>Posts:</h3>
+            {% for post in posts %}
+            <ul>
+                {{ post }}
+            </ul>
+            {% endfor %}
+        </div>
+    </body>
+</html>
