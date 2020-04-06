@@ -10,8 +10,9 @@ create table post (
     post_board_id integer,
     user text not null,
     date text not null,
-    post text not null,
-    image_file text,
+    post text,
+    img_filename text,
+    img_uniqid text,
     foreign key(post_board_id) references board(board_id)
 );
 
@@ -21,7 +22,8 @@ create table reply (
     reply_post_id integer,
     user text not null,
     date text not null,
-    post text not null,
-    image_file text,
+    reply text,
+    img_filename text,
+    img_uniqid text,
     foreign key(reply_post_id) references post(post_id)
 );

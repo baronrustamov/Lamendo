@@ -2,15 +2,18 @@
 <html>
     <head>
         <title>Flask Image Boards</title>
+        <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
     </head>
     <body>
         <h1>Boards</h1>
         {% for board in boards %}
-            <ul>
-                <a href="/{{board.board_acronym}}">
-                    {{ "/"+board.board_acronym +"/  - "+ board.board_description}}
-                </a>
-            </ul>
+            <div>
+                <ul>
+                    <a href="/{{board.board_acronym}}">
+                        /{{board.board_acronym}}/ - {{board.board_description}}
+                    </a>
+                </ul>
+            </div>
         {% endfor %}
     </body>
 </html>
