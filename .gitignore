@@ -1,0 +1,5 @@
+__pycache__/
+
+*.db
+
+static/img_uploads/

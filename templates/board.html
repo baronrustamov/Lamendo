@@ -2,22 +2,38 @@
 <html>
     <head>
         <title>{{board_acronym}}</title>
+        <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
     </head>
     <body>
-        <h1>{{board_acronym}}</h1>
-        <div>
+        <h1><a href="{{url_for('home')}}">Boards</a></h1>
+        <h2 class="title">{{board_acronym}}</h2>
+        <div class="postform">
             <h3>Create Post:</h3>
-            <form method="POST" action="/{{board_acronym}}/post">
-                post: <textarea type="text" name="post_text" rows="4" cols="50"></textarea>
-                image: not implemented yet
-                <input type="submit" value="post">
+            <form method="POST" action="/{{board_acronym}}/post" enctype="multipart/form-data">
+                <div class="postform">
+                    <textarea  type="text" name="post_upload_text" rows="4" cols="40"></textarea>
+                </div>
+                <div class="postform">
+                    <input  type="file" value="Choose File" name="post_upload_image">
+                </div>
+                <input type="submit" value="Post">
             </form>
         </div>
         <div>
             <h3>Posts:</h3>
             {% for post in posts %}
             <ul>
-                {{ post }}
+                <div class="metadata">{{ post.date + " " + post.user }}</div>
+                <p>
+                    {% if post.image_filename %}
+                        <a href="{{url_for('static', filename='img_uploads/' + post.image_uniqid + post.image_ext)}}">
+                            <img style="width:200px" src="{{url_for('static', filename='img_uploads/' + post.image_uniqid + post.image_ext)}}"/>
+                        </a>
+                    {% endif %}
+                    {% if post.post %}
+                        {{ post.post }}
+                    {% endif %}
+                </p>
             </ul>
             {% endfor %}
         </div>
