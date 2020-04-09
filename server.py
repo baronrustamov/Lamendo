@@ -13,13 +13,14 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__, static_url_path='/static')
 
 UPLOAD_FOLDER = 'UPLOAD_FOLDER'
+ALLOWED_FILETYPES = {'.png', '.jpg', '.jpeg', '.gif'}
 app.config[UPLOAD_FOLDER] = 'static/img_uploads'
 
 DATABASE = 'db/img_board.db'
 SCHEMA = 'db/schema.sql'
 
 
-# Dot notation > dictionary syntax for use in our HTML
+# Dot notation > dictionary syntax for use in JINJA
 class Board(NamedTuple):
     board_id: int
     board_acronym: str
@@ -34,6 +35,7 @@ class Post(NamedTuple):
     image_filename: str
     image_uniqid: str
     image_ext: str
+    # reply: 'Reply'
 
 class Reply(NamedTuple):
     reply_id: int
@@ -44,6 +46,10 @@ class Reply(NamedTuple):
     image_filename: str
     image_uniqid: str
     image_ext: str
+
+class Post_Reply(NamedTuple):
+    post: 'Post'
+    reply: 'Reply'
 
 
 @app.route('/')
@@ -56,32 +62,46 @@ def home():
 
 @app.route('/<board_acronym>')
 def board(board_acronym):
-    sql_string = 'select post.* from board, post where board_acronym=? and post_board_id=board_id'
+    sql_string = """
+                    select post.*, reply.*
+                    from board
+                        left join post on board.board_id = post.post_board_id
+                        left join reply on post.post_id = reply.reply_post_id
+                    where board_acronym=?;
+                """
     posts = query_db(sql_string, args=[board_acronym])
-    # if posts:
-    post_NTs = []
-    for post in posts:
-        # Want to make use of argument unpacking, Post(*post_cpy)
-        # Need to unlock the tuple to change some args
-        post_cpy = list(post)
-        post_cpy[6] = str(post[6])
-        post_cpy.append(get_file_ext(post[5]))
-        nt = Post(*post_cpy)
-        post_NTs.append(nt)
-    return render_template('board.html', board_acronym=board_acronym, posts=post_NTs)
-    # else:
-    #     return redirect(url_for('home'))
+    if posts[0][0]:
+        # Create format: post = [post, replies]
+        post_dict = {}
+        for post in posts:
+            post_id = post[0]
+            if post_id not in post_dict.keys():
+                post_cpy = list(post)[:7]
+                post_cpy.append(get_file_ext(post_cpy[5]))
+                post_dict[post_id] = {'post': Post(*post_cpy), 'reply': []}
+
+            reply_args = list(post[7:])
+            reply_args.append(get_file_ext(post[-2]))
+            if any(reply_args):
+                reply = Reply(*reply_args)
+                post_dict[post_id]['reply'].append(reply)
+            else:
+                post_dict[post_id]['reply'] = None
+
+        posts = []
+        for post in post_dict.values():
+            posts.append(Post_Reply(post['post'], post['reply']))
+    else:
+        posts = None
+
+    return render_template('board.html', board_acronym=board_acronym, posts=posts)
 
 
 @app.route('/<board_acronym>/post', methods=['POST'])
 def post(board_acronym):
-    sql_string = 'select board_id from board, post where board_acronym=? and post_board_id=board_id'
-    try:
-        board_id = query_db(sql_string, args=[board_acronym], one=True)[0]
-    except:
-        enum = {'g': 1, 'ck': 2, 'b': 3}
-        board_id = enum[board_acronym]
-
+    sql_string = 'select board_id from board where board_acronym = ?'
+    board_id = query_db(sql_string, args=[board_acronym], one=True)[0]
+ 
     post = request.form.get('post_upload_text')
     
     image_uniqid = None
@@ -91,26 +111,48 @@ def post(board_acronym):
         image_uniqid = get_new_uniqid()
         upload_successful = upload_img(image_obj, image_uniqid)
         if not upload_successful:
-            print('Upload unsuccessful.')
+            print('Post upload unsuccessful.')
             return redirect(url_for('board', board_acronym=board_acronym))
 
     if not board_id or type(board_id)!=int:
         raise ValueError(f'board_id: {board_id}')
 
-    # Important check since we do not enforce NOT NULL in the db schema
+    # Important to check since we do not enforce NOT NULL in the db schema
     if post or image_obj.filename:
         create_post(board_id, post, image_obj.filename, image_uniqid)
     
-    print_upload_task(post, image_obj.filename)
+    print_upload_task('post', image_obj.filename)
 
     return redirect(url_for('board', board_acronym=board_acronym))
 
 
+@app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
+def reply(board_acronym, post_id):
+    reply = request.form.get('reply_upload_text')
+    
+    image_uniqid = None
+    image_obj = request.files['reply_upload_image']
+    image_obj.filename = image_obj.filename.lower()
+    if image_obj.filename != '':
+        image_uniqid = get_new_uniqid()
+        upload_successful = upload_img(image_obj, image_uniqid)
+        if not upload_successful:
+            print('Reply upload unsuccessful.')
+            return redirect(url_for('board', board_acronym=board_acronym))
 
-def print_upload_task(post, filename):
+    # Important to check since we do not enforce NOT NULL in the db schema
+    if reply or image_obj.filename:
+        create_reply(post_id, reply, image_obj.filename, image_uniqid)
+    
+    print_upload_task('reply', image_obj.filename)
+
+    return redirect(url_for('board', board_acronym=board_acronym))
+
+
+def print_upload_task(text, filename):
     msg = 'Uploaded: '
-    if post:
-        msg+='post'
+    if text:
+        msg+=text
     if filename:
         msg+='image'
     if not post and not filename:
@@ -136,6 +178,23 @@ def create_post(post_board_id, post, image_filename, image_uniqid):
         raise ValueError(e)
 
 
+def create_reply(reply_post_id, reply, image_filename, image_uniqid):
+    try:
+        user = 'anon' + str(random.randint(10_000, 99_999))
+        sql_string = """insert into reply(reply_post_id, user, date, reply, image_filename, image_uniqid)
+                            values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+        db = get_db()
+        cur = db.cursor()
+        if image_filename == '': image_filename = None
+        if reply == '': reply = None
+        cur.execute(sql_string, [reply_post_id, user, reply, image_filename, image_uniqid])
+        db.commit()
+        cur.close()
+        return cur.lastrowid
+    except Exception as e:
+        raise ValueError(e)
+
+
 def get_new_uniqid():
     # e.g. 0x385a482f97b356[2:]
     image_uniqid = hex(int(time()*10_000_000))[2:]
@@ -144,9 +203,14 @@ def get_new_uniqid():
 
 def get_file_ext(filename):
     if filename:
-        return '.' + filename.split('.')[-1].lower()
+        ext = '.' + filename.split('.')[-1].lower()
+        if (ext not in ALLOWED_FILETYPES) or (not isinstance(ext, str)):
+            msg = str(ext) + ' not in ' + str(ALLOWED_FILETYPES)
+            raise ValueError(msg)
+        else:
+            return ext
     else:
-        return str(filename)
+        return filename
 
 
 def upload_img(image_obj, image_uniqid):
@@ -170,7 +234,8 @@ def upload_img(image_obj, image_uniqid):
 
 def file_allowed(filename):
     # <something> then .png, .jpg, or .jpeg
-    match = bool(re.match(r'^.+\.(png|jpg|jpeg|gif)$', filename))
+    exts = '|'.join(ALLOWED_FILETYPES)
+    match = bool(re.match(r'^.+(' + exts +')$', filename))
     return match
 
 

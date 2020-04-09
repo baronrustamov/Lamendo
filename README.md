@@ -2,5 +2,4 @@
 
 #### Previews
 
-![Preview](resources/preview1.PNG)
-![Preview](resources/preview2.PNG)
+![Preview](resources/demo.gif)
