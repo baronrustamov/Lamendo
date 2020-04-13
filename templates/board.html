@@ -14,7 +14,7 @@
             <h3>Create Post</h3>
             <form method="POST" action="/{{board_acronym}}/post" enctype="multipart/form-data">
                 <div class="postform">
-                    <textarea  type="text" name="post_upload_text" rows="4" cols="40"></textarea>
+                    <textarea class="post_textarea" maxlength="500" type="text" name="post_upload_text" rows="4" cols="40"></textarea>
                 </div>
                 <div class="postform">
                     <input  type="file" value="Choose File" name="post_upload_image">
@@ -27,9 +27,14 @@
                 <h3>Posts</h3>
                 {% for post_and_reply in posts %}
                 <ul>
-                    <!-- Post -->
+                    <!-- Posts -->
                     <div class="metadata">
                         {{ post_and_reply.post.date + " " + post_and_reply.post.user }}
+                        {% if post_and_reply.post.image_filename %}
+                            {{post_and_reply.post.image_filename}}
+                        {% endif %}
+                    </div>
+                    <div class="metadata">
                         <button class="replybutton" data-reply_action="/{{board_acronym}}/{{post_and_reply.post.post_id}}/reply">reply</button>
                     </div>
                     <div class="img_and_caption">
@@ -45,10 +50,13 @@
 
                     <!-- Replies -->
                     {% if post_and_reply.reply %}
-                        <div class="metadata replies">
+                        <div class="replies">
                             {% for reply in post_and_reply.reply %}
-                                <div>
+                                <div class="metadata">
                                     {{ reply.date + " " + reply.user }}
+                                    {% if reply.image_filename %}
+                                        {{reply.image_filename}}
+                                    {% endif %}
                                 </div>
                                 <div class="img_and_caption">
                                     {% if reply.image_filename %}
@@ -69,9 +77,9 @@
         <div class="replymodal">
             <div id="replybuttonclose" class="close">&times;</div>
             <h3>Reply</h3>
-            <form id="reply_form_id_for_action" method="POST" action="" enctype="multipart/form-data">
+            <form id="reply_form_id_for_action" action="/{{board_acronym}}/{{post_id}}/reply'" method="POST" enctype="multipart/form-data">
                 <div class="replyform">
-                    <textarea  type="text" name="reply_upload_text" rows="4" cols="40"></textarea>
+                    <textarea class="reply_textarea" maxlength="500" type="text" name="reply_upload_text" rows="4" cols="48" placeholder="Reply"></textarea>
                 </div>
                 <div class="replyform">
                     <input  type="file" value="Choose File" name="reply_upload_image">
@@ -85,7 +93,6 @@
                 $('.replymodal').show();
                 // tell the form which post this reply is for
                 $('#reply_form_id_for_action').attr("action", $(this).attr("data-reply_action"));
-                console.log($('#reply_form_id_for_action').attr("action"));
                 $('.replymodal').draggable({ containment: "html", scroll: false });
             });
             $('#replybuttonclose').click(function() {

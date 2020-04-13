@@ -35,7 +35,6 @@ class Post(NamedTuple):
     image_filename: str
     image_uniqid: str
     image_ext: str
-    # reply: 'Reply'
 
 class Reply(NamedTuple):
     reply_id: int
@@ -67,7 +66,8 @@ def board(board_acronym):
                     from board
                         left join post on board.board_id = post.post_board_id
                         left join reply on post.post_id = reply.reply_post_id
-                    where board_acronym=?;
+                    where board_acronym=?
+                    order by post_id, reply_id;
                 """
     posts = query_db(sql_string, args=[board_acronym])
     if posts[0][0]:
@@ -76,6 +76,7 @@ def board(board_acronym):
         for post in posts:
             post_id = post[0]
             if post_id not in post_dict.keys():
+                print(post_id)
                 post_cpy = list(post)[:7]
                 post_cpy.append(get_file_ext(post_cpy[5]))
                 post_dict[post_id] = {'post': Post(*post_cpy), 'reply': []}
@@ -168,8 +169,10 @@ def create_post(post_board_id, post, image_filename, image_uniqid):
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
         db = get_db()
         cur = db.cursor()
-        if image_filename == '': image_filename = None
-        if post == '': post = None
+        if image_filename == '':
+            image_filename = None
+        if post == '':
+            post = None
         cur.execute(sql_string, [post_board_id, user, post, image_filename, image_uniqid])
         db.commit()
         cur.close()
