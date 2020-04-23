@@ -5,6 +5,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
         <title>{{board_acronym}}</title>
         <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="https://www.freefavicon.com/freefavicons/software/cup-of-coffee-152-78475.png"/>
     </head>
     <body>
         
@@ -77,7 +78,7 @@
         <div class="replymodal">
             <div id="replybuttonclose" class="close">&times;</div>
             <h3>Reply</h3>
-            <form id="reply_form_id_for_action" action="/{{board_acronym}}/{{post_id}}/reply'" method="POST" enctype="multipart/form-data">
+            <form id="reply_form_id_for_action" action="" method="POST" enctype="multipart/form-data">
                 <div class="replyform">
                     <textarea class="reply_textarea" maxlength="500" type="text" name="reply_upload_text" rows="4" cols="48" placeholder="Reply"></textarea>
                 </div>
@@ -91,7 +92,9 @@
         <script>
             $('.replybutton').click(function() {
                 $('.replymodal').show();
-                // tell the form which post this reply is for
+                // For telling the form which post this reply is from:
+                // assign the action attibute where id=reply_form_id_for_action
+                // to the specific reply button's data-reply_form_action attribute
                 $('#reply_form_id_for_action').attr("action", $(this).attr("data-reply_action"));
                 $('.replymodal').draggable({ containment: "html", scroll: false });
             });

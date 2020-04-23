@@ -70,7 +70,7 @@ def board(board_acronym):
                     order by post_id, reply_id;
                 """
     posts = query_db(sql_string, args=[board_acronym])
-    if posts[0][0]:
+    if posts:
         # Create format: post = [post, replies]
         post_dict = {}
         for post in posts:
@@ -92,8 +92,6 @@ def board(board_acronym):
         posts = []
         for post in post_dict.values():
             posts.append(Post_Reply(post['post'], post['reply']))
-    else:
-        posts = None
 
     return render_template('board.html', board_acronym=board_acronym, posts=posts)
 
@@ -122,7 +120,7 @@ def post(board_acronym):
     if post or image_obj.filename:
         create_post(board_id, post, image_obj.filename, image_uniqid)
     
-    print_upload_task('post', image_obj.filename)
+        print_upload_task('post', image_obj.filename)
 
     return redirect(url_for('board', board_acronym=board_acronym))
 
@@ -145,7 +143,7 @@ def reply(board_acronym, post_id):
     if reply or image_obj.filename:
         create_reply(post_id, reply, image_obj.filename, image_uniqid)
     
-    print_upload_task('reply', image_obj.filename)
+        print_upload_task('reply', image_obj.filename)
 
     return redirect(url_for('board', board_acronym=board_acronym))
 
@@ -272,6 +270,9 @@ def query_db(query, args=(), one=False):
         cur = get_db().execute(query, args)
         rv = cur.fetchall()
         cur.close()
+        if rv == []:
+            print(query)
+            return None
         if one:
             return rv[0] if rv else None
         else:
