@@ -9,7 +9,7 @@
     </head>
     <body>
         
-        <h1><a href="{{url_for('board', board_acronym=board_acronym)}}">{{board_acronym}}</a></h1>
+        <h1><a href="{{url_for('board_catalog', board_acronym=board_acronym)}}">{{board_acronym}}</a></h1>
         <div class="replyform">
             <h3>Create Reply</h3>
             <form method="POST" action="/{{board_acronym}}/{{post.post_id}}/reply" enctype="multipart/form-data">
