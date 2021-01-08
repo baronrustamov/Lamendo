@@ -1,7 +1,9 @@
 import os
 import re
+from datetime import datetime
 from time import time
 
+from flask import current_app
 from werkzeug.utils import secure_filename
 
 from .config import ALLOWED_FILETYPES
@@ -34,7 +36,10 @@ def upload_image(img_obj, img_uniqid):
         # 385a482f97b356.png
         img_stored_filename = img_uniqid + extension
         # path/385a482f97b356.png
-        img_path = os.path.join(app.config['UPLOAD_FOLDER'], img_stored_filename)
+        with current_app.app_context():
+            img_path = os.path.join(
+                current_app.config['UPLOAD_FOLDER'], img_stored_filename
+            )
         img_obj.save(img_path)
         return True
     return False
@@ -45,3 +50,8 @@ def is_file_allowed(filename):
     exts = '|'.join(ALLOWED_FILETYPES)
     match = bool(re.match(r'^.+(' + exts + ')$', filename))
     return match
+
+
+def make_date(val):
+    d = datetime.fromisoformat(val)
+    return d.strftime('%B %d, %Y %H:%M')

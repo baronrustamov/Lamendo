@@ -1,7 +1,76 @@
 import random
+from datetime import datetime
+from typing import NamedTuple
 
-from .db import Board, Post, Reply, get_db, query_db
-from .utils import get_file_ext
+from .db import get_db, query_db
+from .utils import get_file_ext, make_date
+
+
+# Dot notation > dictionary syntax for Jinja templates
+class Board(NamedTuple):
+    board_id: int
+    board_acronym: str
+    board_description: str
+
+
+class Post(NamedTuple):
+    post_id: int
+    post_board_id: int
+    user: str
+    post: str
+    img_filename: str
+    img_uniqid: str
+    img_ext: str
+    date: datetime
+
+
+class Reply(NamedTuple):
+    reply_id: int
+    reply_post_id: int
+    user: str
+    reply: str
+    img_filename: str
+    img_uniqid: str
+    img_ext: str
+    date: datetime
+
+
+def make_post(sql_row_obj):
+    p = Post(
+        sql_row_obj['post_id'],
+        sql_row_obj['post_board_id'],
+        sql_row_obj['user'],
+        sql_row_obj['post'],
+        sql_row_obj['img_filename'],
+        sql_row_obj['img_uniqid'],
+        get_file_ext(sql_row_obj['img_filename']),
+        make_date(sql_row_obj['date']),
+    )
+    return p
+
+
+def make_posts(sql_row_objs):
+    posts = ([make_post(p) for p in sql_row_objs]) if sql_row_objs else None
+    return posts
+
+
+def make_replies(sql_row_objs):
+    replies = None
+    if sql_row_objs:
+        replies = []
+        for r in sql_row_objs:
+            _r = Reply(
+                r['reply_id'],
+                r['reply_post_id'],
+                r['user'],
+                r['reply'],
+                r['img_filename'],
+                r['img_uniqid'],
+                get_file_ext(r['img_filename']),
+                make_date(r['date']),
+            )
+            replies.append(_r)
+    return replies
 
 
 def get_board_acronyms():
@@ -19,13 +88,8 @@ def get_post(post_id):
         from post
         where post.post_id = ?;
     """
-    sql_row_objs = query_db(sql_string, args=[post_id])
-    post = (
-        ([Post(*p, get_file_ext(p[5])) for p in sql_row_objs][0])
-        if sql_row_objs
-        else None
-    )
-    return post
+    sql_row_objs = query_db(sql_string, args=[post_id], one=True)
+    return make_post(sql_row_objs)
 
 
 def get_post_replies(post_id):
@@ -35,12 +99,7 @@ def get_post_replies(post_id):
         where reply.reply_post_id = ?;
     """
     sql_row_objs = query_db(sql_string, args=[post_id])
-    replies = (
-        ([Reply(*r, get_file_ext(r[5])) for r in sql_row_objs])
-        if sql_row_objs
-        else None
-    )
-    return replies
+    return make_replies(sql_row_objs)
 
 
 def get_boards_posts(board_acronym):
@@ -53,10 +112,7 @@ def get_boards_posts(board_acronym):
         order by post_id;
     """
     sql_row_objs = query_db(sql_string, args=[board_acronym])
-    posts = (
-        ([Post(*p, get_file_ext(p[5])) for p in sql_row_objs]) if sql_row_objs else None
-    )
-    return posts
+    return make_posts(sql_row_objs)
 
 
 def get_boards():

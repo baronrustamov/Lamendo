@@ -1,39 +1,10 @@
+import inspect
 import os
 import sqlite3
-from typing import NamedTuple
 
 from flask import current_app, g
 
 from .config import DATABASE, INIT_DATA, SCHEMA
-
-
-# Dot notation > dictionary syntax for Jinja templates
-class Board(NamedTuple):
-    board_id: int
-    board_acronym: str
-    board_description: str
-
-
-class Post(NamedTuple):
-    post_id: int
-    post_board_id: int
-    user: str
-    date: str
-    post: str
-    img_filename: str
-    img_uniqid: str
-    img_ext: str
-
-
-class Reply(NamedTuple):
-    reply_id: int
-    reply_post_id: int
-    user: str
-    date: str
-    reply: str
-    img_filename: str
-    img_uniqid: str
-    img_ext: str
 
 
 def init_db():
@@ -76,13 +47,14 @@ def query_db(query, args=(), one=False):
     """https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/#easy-querying"""
     with current_app.app_context():
         try:
+            print('Query called from:', inspect.stack()[1][3])
             cur = get_db().execute(query, args)
-            rv = cur.fetchall()
+            r = cur.fetchall()
             cur.close()
-            if rv == []:
+            if r == []:
                 return None
             if one:
-                return rv[0] if rv else None
-            return rv
+                return r[0] if r else None
+            return r
         except Exception as e:
             raise Exception(e) from None

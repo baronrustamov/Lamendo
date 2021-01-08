@@ -26,6 +26,8 @@ body {
     margin-top: 5px;
     padding-left: 5px;
     padding-right: 5px;
+    max-width: 85%;
+    margin: auto;
 }
 
 .replybutton{
@@ -53,10 +55,6 @@ body {
     display: block;
 }
 
-.replyform{
-    display: block;
-}
-
 .close {
     color: #aaaaaa;
     float: right;
@@ -74,7 +72,6 @@ body {
 div {
     display: block;
     margin: 0 auto;
-    max-width: 700px;
 }
 
 .img_and_caption{
@@ -85,17 +82,17 @@ div {
     padding-right: 20px;
 }
 
-a:visited{
-    color: #c6c8c6;
-}
-
 a{
     text-decoration: none;
     color: #c6c8c6;
 }
 
+a:visited{
+    color: #c6c8c6;
+}
+
 img {
-    padding: 10px;
+    padding-right: 10px;
     padding-top: 0px;
     width: 200px;
 }

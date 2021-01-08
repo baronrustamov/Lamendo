@@ -52,8 +52,6 @@ def board_post(board_acronym, post_id):
         abort(404)
 
     replies = get_post_replies(post_id)
-    if not replies:
-        abort(404)
 
     return render_template(
         'post.html', board_acronym=board_acronym, post=post, replies=replies
@@ -63,7 +61,7 @@ def board_post(board_acronym, post_id):
 @app.route('/<board_acronym>/post', methods=['POST'])
 def post_form(board_acronym):
     sql_string = 'select board_id from board where board_acronym = ?'
-    board_id = query_db(sql_string, args=[board_acronym], one=True)[0]
+    board_id = query_db(sql_string, args=[board_acronym], one=True)['board_id']
 
     post = request.form.get('post_upload_text')
 
@@ -91,7 +89,6 @@ def post_form(board_acronym):
 
 @app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
 def reply_form(board_acronym, post_id):
-    print('rpekrpiwejg')
     reply = request.form.get('reply_upload_text')
 
     img_uniqid = None

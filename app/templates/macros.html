@@ -1,0 +1,28 @@
+{% macro metadata(record) %}
+  <div class="metadata">
+    {{ record.date + " " + record.user }}
+    {% if record.img_filename %}
+    {{record.img_filename}}
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
+
+
+{% macro data(record, type) %}
+  <div class="img_and_caption">
+    {% if record.img_filename %}
+      <a href="{{url_for('static', filename='img_uploads/' + record.img_uniqid + record.img_ext)}}">
+        <img src="{{url_for('static', filename='img_uploads/' + record.img_uniqid + record.img_ext)}}"/>
+      </a>
+    {% endif %}
+    
+    {% if type == "reply" %}
+      {{ record.reply }}
+    {% else %}
+      {{ record.post }}
+    {% endif %}
+
+  </div>
+{% endmacro %}

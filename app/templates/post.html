@@ -1,98 +1,56 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
-        <title>{{board_acronym}}</title>
-        <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
-        <link rel="shortcut icon" type="img/png" href="https://www.freefavicon.com/freefavicons/software/cup-of-coffee-152-78475.png"/>
-    </head>
-    <body>
-        
-        <h1><a href="{{url_for('board_catalog', board_acronym=board_acronym)}}">{{board_acronym}}</a></h1>
-        <div class="replyform">
-            <h3>Create Reply</h3>
-            <form method="POST" action="/{{board_acronym}}/{{post.post_id}}/reply" enctype="multipart/form-data">
-                <div class="replyform">
-                    <textarea class="reply_textarea" maxlength="500" type="text" name="reply_upload_text" rows="4" cols="40"></textarea>
-                </div>
-                <div class="replyform">
-                    <input type="file" value="Choose File" name="reply_upload_img">
-                </div>
-                <input type="submit" value="Reply">
-            </form>
-        </div>
-        <div>
+{% extends 'layout.html' %}
+{% import 'macros.html' as macros %}
 
-        <h3>Post</h3>
-        <div class="metadata">
-            {{post.post_id}}. {{ post.date + " " + post.user }}
-            {% if post.img_filename %}
-                {{post.img_filename}}
-            {% endif %}
-        </div>
-        <div class="metadata">
-            <button class="replybutton" data-reply-action="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
-        </div>
-        <div class="img_and_caption">
-            {% if post.img_filename %}
-                <a href="{{url_for('static', filename='img_uploads/' + post.img_uniqid + post.img_ext)}}">
-                    <img src="{{url_for('static', filename='img_uploads/' + post.img_uniqid + post.img_ext)}}"/>
-                </a>
-            {% endif %}
-            {% if post %}
-                {{ post.post }}
-            {% endif %}
-        </div>
+{% block body %}
 
-        {% if replies %}
-            <h3>Replies</h3>
-            <div class="replies">
-                {% for reply in replies %}
-                    <div class="metadata">
-                        {{ reply.date + " " + reply.user }}
-                        {% if reply.img_filename %}
-                            {{reply.img_filename}}
-                        {% endif %}
-                    </div>
-                    <div class="img_and_caption">
-                        {% if reply.img_filename %}
-                            <a href="{{url_for('static', filename='img_uploads/' + reply.img_uniqid + reply.img_ext)}}">
-                                <img src="{{url_for('static', filename='img_uploads/' + reply.img_uniqid + reply.img_ext)}}"/>
-                            </a>
-                        {% endif %}
-                        {{ reply.reply }}
-                        </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        
-        <div class="replymodal">
-            <div id="replybuttonclose" class="close">&times;</div>
-            <h3>Reply</h3>
-            <form id="reply_form_id_for_action" action="/{{board_acronym}}/{{post.post_id}}/reply" method="POST" enctype="multipart/form-data">
-                <div class="replyform">
-                    <textarea class="reply_textarea" maxlength="500" type="text" name="reply_upload_text" rows="4" cols="48" placeholder="Reply"></textarea>
-                </div>
-                <div class="replyform">
-                    <input  type="file" value="Choose File" name="reply_upload_img">
-                </div>
-                <input type="submit" value="Reply">
-            </form>
-        </div>
+<h4><a href="{{url_for('board_catalog', board_acronym=board_acronym)}}">Go to {{board_acronym}}'s catalog</a></h4>
 
-        <script>
-            $('.replybutton').click(function() {
-                $('.replymodal').show();
-                // For telling the form which post this reply is from:
-                // assign the action attibute where id=reply_form_id_for_action
-                // to the specific reply button's data-reply_form_action attribute
-                $('#reply_form_id_for_action').attr("action", $(this).attr("data-reply-action"));
-                $('.replymodal').draggable({ containment: "html", scroll: false });
-            });
-            $('#replybuttonclose').click(function() {
-                $('.replymodal').hide();
-            });
-        </script>
-    </body>
-</html>
+<h3>Post</h3>
+{{ macros.metadata(post) }}
+
+<div class="metadata">
+  <button class="replybutton" data-reply-action="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
+</div>
+{{ macros.data(post, "post") }}
+
+
+{% if replies %}
+  <h3>Replies</h3>
+  <div class="replies">
+    {% for reply in replies %}
+    
+      {{ macros.metadata(reply) }}
+      {{ macros.data(reply, "reply") }}
+
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="replymodal">
+  <div id="replybuttonclose" class="close">&times;</div>
+  <h3>Reply</h3>
+  <form id="reply_form_id" action="/{{board_acronym}}/{{post.post_id}}/reply" method="POST" enctype="multipart/form-data">
+    <div class="replyform">
+      <textarea class="reply_textarea" maxlength="500" type="text" name="reply_upload_text" rows="4" cols="48" placeholder="Reply"></textarea>
+    </div>
+    <div class="replyform">
+      <input  type="file" value="Choose File" name="reply_upload_img">
+    </div>
+    <input type="submit" value="Reply">
+  </form>
+</div>
+
+<script>
+  $('.replybutton').click(function() {
+    $('.replymodal').show();
+    // Get the element where id=reply_form_id and assign its action attibute
+    // to the specific reply button's data-reply-action attribute
+    $('#reply_form_id').attr("action", $(this).attr("data-reply-action"));
+    $('.replymodal').draggable({ containment: "html", scroll: false });
+  });
+  $('#replybuttonclose').click(function() {
+    $('.replymodal').hide();
+  });
+</script>
+
+{% endblock %}
