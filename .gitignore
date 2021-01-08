@@ -2,4 +2,4 @@ __pycache__/
 
 *.db
 
-static/img_uploads/
+img_uploads/
