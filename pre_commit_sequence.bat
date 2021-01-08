@@ -4,21 +4,21 @@
 cls
 
 echo Running isort...
-py -m isort .
+py -m isort ./app
 echo Done!
 echo.
 echo.
 
 
 echo Running black...
-py -m black . -S  --line-length=88
+py -m black ./app -S  --line-length=88
 echo Done!
 echo.
 echo.
 
 
 echo Running pylint...
-py -m pylint server.py --disable=C0116,C0114,E0401,C0413,C0103,C0115,I1101,E1101
+py -m pylint ./app/server.py --disable=C0116,C0114,E0401,C0413,C0103,C0115,I1101,E1101
 echo Done!
 echo.
 
