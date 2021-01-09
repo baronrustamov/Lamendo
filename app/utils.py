@@ -6,8 +6,17 @@ from time import time
 from flask import current_app
 from werkzeug.utils import secure_filename
 
-from .config import ALLOWED_FILETYPES
+from config import ALLOWED_FILETYPES
 
+
+def make_none(*args):
+    l = []
+    for arg in args:
+        if arg == '':
+            l.append(None)
+        else:
+            l.append(arg)
+    return tuple(l)
 
 def get_new_uniqid():
     # e.g. 0x385a482f97b356[2:]

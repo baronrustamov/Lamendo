@@ -2,8 +2,8 @@ import random
 from datetime import datetime
 from typing import NamedTuple
 
-from .db import get_db, query_db
-from .utils import get_file_ext, make_date
+from db import get_db, query_db
+from utils import get_file_ext, make_date, make_none
 
 
 # Dot notation > dictionary syntax for Jinja templates
@@ -36,17 +36,19 @@ class Reply(NamedTuple):
 
 
 def make_post(sql_row_obj):
-    p = Post(
-        sql_row_obj['post_id'],
-        sql_row_obj['post_board_id'],
-        sql_row_obj['user'],
-        sql_row_obj['post'],
-        sql_row_obj['img_filename'],
-        sql_row_obj['img_uniqid'],
-        get_file_ext(sql_row_obj['img_filename']),
-        make_date(sql_row_obj['date']),
-    )
-    return p
+    if sql_row_obj:
+        p = Post(
+            sql_row_obj['post_id'],
+            sql_row_obj['post_board_id'],
+            sql_row_obj['user'],
+            sql_row_obj['post'],
+            sql_row_obj['img_filename'],
+            sql_row_obj['img_uniqid'],
+            get_file_ext(sql_row_obj['img_filename']),
+            make_date(sql_row_obj['date']),
+        )
+        return p
+    return None
 
 
 def make_posts(sql_row_objs):
@@ -63,7 +65,7 @@ def make_replies(sql_row_objs):
                 r['reply_id'],
                 r['reply_post_id'],
                 r['user'],
-                r['reply'],
+                '' if r['reply'] is None else r['reply'],
                 r['img_filename'],
                 r['img_uniqid'],
                 get_file_ext(r['img_filename']),
@@ -122,39 +124,39 @@ def get_boards():
     return boards
 
 
-def create_post(post_board_id, post, img_filename, img_uniqid):
+def get_board_id(board_acronym):
+    sql_string = 'select board_id from board where board_acronym = ?'
+    board_id = query_db(sql_string, args=[board_acronym], one=True)['board_id']
+    return board_id
+
+
+def create_post(post_board_id, post, img_filename, img_uniqid, ip):
     try:
-        user = 'anon' + str(random.randint(10_000, 99_999))
+        user = ip
         sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uniqid)
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+        img_filename, post = make_none(img_filename, post)
+        
         db = get_db()
         cur = db.cursor()
-        if img_filename == '':
-            img_filename = None
-        if post == '':
-            post = None
         cur.execute(sql_string, [post_board_id, user, post, img_filename, img_uniqid])
         db.commit()
         cur.close()
-        return cur.lastrowid
     except Exception as e:
         raise ValueError(e) from None
 
 
-def create_reply(reply_post_id, reply, img_filename, img_uniqid):
+def create_reply(reply_post_id, reply, img_filename, img_uniqid, ip):
     try:
-        user = 'anon' + str(random.randint(10_000, 99_999))
+        user = ip
         sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uniqid)
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+        img_filename, reply = make_none(img_filename, reply)
+        
         db = get_db()
         cur = db.cursor()
-        if img_filename == '':
-            img_filename = None
-        if reply == '':
-            reply = None
         cur.execute(sql_string, [reply_post_id, user, reply, img_filename, img_uniqid])
         db.commit()
         cur.close()
-        return cur.lastrowid
     except Exception as e:
         raise ValueError(e) from None

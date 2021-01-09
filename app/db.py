@@ -4,7 +4,7 @@ import sqlite3
 
 from flask import current_app, g
 
-from .config import DATABASE, INIT_DATA, SCHEMA
+from config import DATABASE, INIT_DATA, SCHEMA
 
 
 def init_db():
@@ -48,7 +48,8 @@ def query_db(query, args=(), one=False):
     with current_app.app_context():
         try:
             print('Query called from:', inspect.stack()[1][3])
-            cur = get_db().execute(query, args)
+            db = get_db()
+            cur = db.execute(query, args)
             r = cur.fetchall()
             cur.close()
             if r == []:
