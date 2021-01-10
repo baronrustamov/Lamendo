@@ -18,6 +18,7 @@ def make_none(*args):
             l.append(arg)
     return tuple(l)
 
+
 def get_new_uniqid():
     # e.g. 0x385a482f97b356[2:]
     img_uniqid = hex(int(time() * 10_000_000))[2:]

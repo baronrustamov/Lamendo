@@ -1,30 +1,64 @@
+import logging
 import os
+from datetime import datetime
 
 from flask import Flask, abort, redirect, render_template, request, url_for
+import pytz
 
 from api import (
     create_post,
     create_reply,
+    get_board_id,
     get_boards,
     get_boards_posts,
     get_post,
     get_post_replies,
-    get_board_id
 )
-from db import query_db
+from config import IMG_PATH, LOG_PATH
 from urls import URLSpace
 from utils import get_new_uniqid, upload_image
-from configs import IMG_PATH
 
 app = Flask(__name__)
+
 app.secret_key = str(os.urandom(16))
 
 app.config['UPLOAD_FOLDER'] = IMG_PATH
-
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.config['MAX_CONTENT_LENGTH'] = 3_145_728
 
 with app.app_context():
     app.url_space = URLSpace()
+
+app.config['LOG_FILEPATH'] = LOG_PATH
+logging.basicConfig(filename=app.config['LOG_FILEPATH'], level=logging.INFO)
+
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
+eastern = pytz.timezone('US/Eastern')
+
+
+@app.after_request
+def after_request(response):
+    env = request.environ
+    attrs = [
+        'REQUEST_URI',
+        'REQUEST_METHOD',
+        'REMOTE_ADDR',
+        'REMOTE_PORT',
+        'CONTENT_LENGTH',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_REFERER',
+    ]
+    not_found = 'unknown'
+    l = [f'{attr}: {env.get(attr, not_found)}' for attr in attrs]
+    l.insert(0, eastern.fromutc(datetime.utcnow()).strftime('%c'))
+    logging.info(', '.join(l))
+    return response
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
 
 
 @app.route('/')
@@ -67,8 +101,6 @@ def post_form(board_acronym):
         upload_image(img_obj, img_uniqid)
         ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
         create_post(board_id, post, img_obj.filename, img_uniqid, ip)
-        print(request.environ, request.remote_addr)
-        print_upload_task('post', img_obj.filename)
     else:
         print('Posts require a body of text and an image.')
 
@@ -87,16 +119,11 @@ def reply_form(board_acronym, post_id):
         upload_image(img_obj, img_uniqid)
         ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
         create_reply(post_id, reply, img_obj.filename, img_uniqid, ip)
-        print(request.environ, request.remote_addr)
-        print_upload_task('reply', img_obj.filename)
     else:
         print('Replies require a body of text or an image.')
 
     return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
 
-
-def print_upload_task(text, filename):
-    print(f'Received upload -- Text: {text} -- File: {filename}')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

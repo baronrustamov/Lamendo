@@ -9,7 +9,7 @@
 {{ macros.metadata(post) }}
 
 <div class="metadata">
-  <button class="replybutton" data-reply-action="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
+  <button id="replybutton" data-reply-action="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
 </div>
 {{ macros.data(post, "post") }}
 
@@ -34,22 +34,33 @@
       <textarea class="reply_textarea" maxlength="500" type="text" name="reply_upload_text" rows="4" cols="48" placeholder="Reply"></textarea>
     </div>
     <div class="replyform">
-      <input  type="file" value="Choose File" name="reply_upload_img">
+      <input id="input_reply_img" type="file" value="Choose File" name="reply_upload_img" accept="image/jpg,image/png,image/jpeg,image/gif">
     </div>
+    <div id="post_feedback"></div>
     <input type="submit" value="Reply">
   </form>
 </div>
 
 <script>
-  $('.replybutton').click(function() {
-    $('.replymodal').show();
-    // Get the element where id=reply_form_id and assign its action attibute
-    // to the specific reply button's data-reply-action attribute
-    $('#reply_form_id').attr("action", $(this).attr("data-reply-action"));
-    $('.replymodal').draggable({ containment: "html", scroll: false });
-  });
-  $('#replybuttonclose').click(function() {
-    $('.replymodal').hide();
+  $(document).ready(function() {
+    $('#replybutton').click(function() {
+      $('.replymodal').show();
+      // Get the element where id=reply_form_id and assign its action attibute
+      // to the specific reply button's data-reply-action attribute
+      $('#reply_form_id').attr("action", $(this).attr("data-reply-action"));
+      $('.replymodal').draggable({ containment: "html", scroll: false });
+    });
+
+    $('#replybuttonclose').click(function() {
+      $('.replymodal').hide();
+    });
+
+    $('#input_reply_img').change(function() {
+        if(this.files[0].size > 3_145_728){
+          $('#post_feedback').html('File size must be less than 3MB.');
+          this.value = null;
+        };
+    });
   });
 </script>
 

@@ -136,7 +136,7 @@ def create_post(post_board_id, post, img_filename, img_uniqid, ip):
         sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uniqid)
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
         img_filename, post = make_none(img_filename, post)
-        
+
         db = get_db()
         cur = db.cursor()
         cur.execute(sql_string, [post_board_id, user, post, img_filename, img_uniqid])
@@ -152,7 +152,7 @@ def create_reply(reply_post_id, reply, img_filename, img_uniqid, ip):
         sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uniqid)
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
         img_filename, reply = make_none(img_filename, reply)
-        
+
         db = get_db()
         cur = db.cursor()
         cur.execute(sql_string, [reply_post_id, user, reply, img_filename, img_uniqid])

@@ -12,7 +12,7 @@
       <textarea class="post_textarea" maxlength="500" type="text" name="post_upload_text" rows="4" cols="40"></textarea>
     </div>
     <div class="postform">
-      <input  type="file" value="Choose File" name="post_upload_img">
+      <input id="input_post_img" type="file" value="Choose File" name="post_upload_img" accept="image/jpg,image/png,image/jpeg,image/gif">
     </div>
     <input type="submit" value="Post">
   </form>
@@ -39,4 +39,16 @@
     {% endfor %}
   {% endif %}
 </div>
+
+<script>
+  $(document).ready(function() {
+    $('#input_post_img').change(function() {
+        if(this.files[0].size > 3_145_728){
+          alert('File size must be less than 3MB.');
+          this.value = null;
+        };
+    });
+  });
+</script>
+
 {% endblock %}

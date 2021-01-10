@@ -19,4 +19,5 @@ class URLSpace:
                 if not current_app.url_space.valid_board_acronym(board_acronym):
                     abort(404)
             return fn(*args, **kwargs)
+
         return wrapper

@@ -4,3 +4,5 @@ __pycache__/
 
 app/static/img_uploads/
 !1a2b3c4d5e.png
+
+*.log

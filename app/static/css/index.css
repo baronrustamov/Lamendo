@@ -7,7 +7,6 @@ h1 {
 }
 
 .metadata{
-    word-spacing: 4px;
     background-color: rgb(49, 61, 83);
     color: rgb(15, 15, 15);
     border-radius: 3px;
@@ -30,7 +29,7 @@ body {
     margin: auto;
 }
 
-.replybutton{
+#replybutton{
     background: none;
     color: inherit;
     border: none;
@@ -48,7 +47,6 @@ body {
 
 .title {
     text-align: center;
-    text-emphasis: bold;
 }
 
 .postform{
