@@ -8,11 +8,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
     <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
   </head>
-
+  
   <body>
     <div>
       {% include 'flash.html' %}
       {% block body %}{% endblock %}
     </div>
   </body>
+  <script src="{{ url_for('static', filename='js/index.js') }}" type="text/javascript"></script>
 </html>

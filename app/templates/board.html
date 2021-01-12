@@ -7,14 +7,16 @@
 <h2 class="title">{{board_acronym}}</h2>
 <div class="postform">
   <h3>Create Post</h3>
-  <form method="POST" action="/{{board_acronym}}/post" enctype="multipart/form-data">
+  <form method="POST" id="post_form" action="/{{board_acronym}}/post" enctype="multipart/form-data">
     <div class="postform">
-      <textarea class="post_textarea" maxlength="500" type="text" name="post_upload_text" rows="4" cols="40"></textarea>
+      <textarea id="form_text" class="post_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="40"></textarea>
     </div>
     <div class="postform">
-      <input id="input_post_img" type="file" value="Choose File" name="post_upload_img" accept="image/jpg,image/png,image/jpeg,image/gif">
+      <input id="form_img" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
     </div>
-    <input type="submit" value="Post">
+    <div id="feedback"></div>
+    <input id="post_submit" type="submit" value="Post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
   </form>
 </div>
 
@@ -39,16 +41,5 @@
     {% endfor %}
   {% endif %}
 </div>
-
-<script>
-  $(document).ready(function() {
-    $('#input_post_img').change(function() {
-        if(this.files[0].size > 3_145_728){
-          alert('File size must be less than 3MB.');
-          this.value = null;
-        };
-    });
-  });
-</script>
 
 {% endblock %}

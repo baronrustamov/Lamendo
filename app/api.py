@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from time import time
 from typing import NamedTuple
 
 from db import get_db, query_db
@@ -34,33 +35,39 @@ class Reply(NamedTuple):
     img_ext: str
     date: datetime
 
+class Event(NamedTuple):
+    event_id: int
+    ip: str
+    last_event_date: int
+    blacklisted: bool
+    blacklisted_until: int
 
-def make_post(sql_row_obj):
-    if sql_row_obj:
+def make_post(row):
+    if row:
         p = Post(
-            sql_row_obj['post_id'],
-            sql_row_obj['post_board_id'],
-            sql_row_obj['user'],
-            sql_row_obj['post'],
-            sql_row_obj['img_filename'],
-            sql_row_obj['img_uniqid'],
-            get_file_ext(sql_row_obj['img_filename']),
-            make_date(sql_row_obj['date']),
+            row['post_id'],
+            row['post_board_id'],
+            row['user'],
+            row['post'],
+            row['img_filename'],
+            row['img_uniqid'],
+            get_file_ext(row['img_filename']),
+            make_date(row['date']),
         )
         return p
     return None
 
 
-def make_posts(sql_row_objs):
-    posts = ([make_post(p) for p in sql_row_objs]) if sql_row_objs else None
+def make_posts(rows):
+    posts = ([make_post(p) for p in rows]) if rows else None
     return posts
 
 
-def make_replies(sql_row_objs):
+def make_replies(rows):
     replies = None
-    if sql_row_objs:
+    if rows:
         replies = []
-        for r in sql_row_objs:
+        for r in rows:
             _r = Reply(
                 r['reply_id'],
                 r['reply_post_id'],
@@ -80,8 +87,8 @@ def get_board_acronyms():
         select board_acronym
         from board;
     """
-    sql_row_objs = query_db(sql_string)
-    return set(row['board_acronym'] for row in sql_row_objs)
+    rows = query_db(sql_string)
+    return set(row['board_acronym'] for row in rows)
 
 
 def get_post(post_id):
@@ -90,8 +97,8 @@ def get_post(post_id):
         from post
         where post.post_id = ?;
     """
-    sql_row_objs = query_db(sql_string, args=[post_id], one=True)
-    return make_post(sql_row_objs)
+    row = query_db(sql_string, args=[post_id], one=True)
+    return make_post(row)
 
 
 def get_post_replies(post_id):
@@ -100,8 +107,8 @@ def get_post_replies(post_id):
         from reply
         where reply.reply_post_id = ?;
     """
-    sql_row_objs = query_db(sql_string, args=[post_id])
-    return make_replies(sql_row_objs)
+    rows = query_db(sql_string, args=[post_id])
+    return make_replies(rows)
 
 
 def get_boards_posts(board_acronym):
@@ -113,14 +120,14 @@ def get_boards_posts(board_acronym):
         and post.post_id is not null
         order by post_id;
     """
-    sql_row_objs = query_db(sql_string, args=[board_acronym])
-    return make_posts(sql_row_objs)
+    rows = query_db(sql_string, args=[board_acronym])
+    return make_posts(rows)
 
 
 def get_boards():
     sql_string = 'select * from board;'
-    sql_row_obj = query_db(sql_string)
-    boards = ([Board(*board) for board in sql_row_obj]) if sql_row_obj else None
+    row = query_db(sql_string)
+    boards = ([Board(*board) for board in row]) if row else None
     return boards
 
 
@@ -130,9 +137,9 @@ def get_board_id(board_acronym):
     return board_id
 
 
-def create_post(post_board_id, post, img_filename, img_uniqid, ip):
+def create_post(post_board_id, post, img_filename, img_uniqid):
     try:
-        user = ip
+        user = 'Anonymous'
         sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uniqid)
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
         img_filename, post = make_none(img_filename, post)
@@ -146,17 +153,48 @@ def create_post(post_board_id, post, img_filename, img_uniqid, ip):
         raise ValueError(e) from None
 
 
-def create_reply(reply_post_id, reply, img_filename, img_uniqid, ip):
-    try:
-        user = ip
-        sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uniqid)
-                            values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
-        img_filename, reply = make_none(img_filename, reply)
+def get_username():
+    return f'Anonymous{random.randint(0, 99)}{chr(random.randrange(97, 97 + 26))}'
 
-        db = get_db()
-        cur = db.cursor()
-        cur.execute(sql_string, [reply_post_id, user, reply, img_filename, img_uniqid])
-        db.commit()
-        cur.close()
-    except Exception as e:
-        raise ValueError(e) from None
+
+def create_reply(reply_post_id, reply, img_filename, img_uniqid):
+    sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uniqid)
+                        values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+    user = get_username()
+    img_filename, reply = make_none(img_filename, reply)
+    
+    query_db(sql_string, [reply_post_id, user, reply, img_filename, img_uniqid])
+
+
+def make_event(row):
+    event = Event(
+        row['event_id'],
+        row['ip'],
+        row['last_event_date'],
+        row['blacklisted'],
+        row['blacklisted_until'],
+    )
+    return event
+
+
+def has_post_privilege(ip):
+    sql_string = """select * from event where ip = ?;"""
+    row = query_db(sql_string, [ip], one=True)
+    event = make_event(row) if row else None
+
+    EVENT_COOLDOWN = 15
+    if event:
+
+        if event.blacklisted or (time() - EVENT_COOLDOWN < event.last_event_date):
+            return False
+
+        sql_string = """update event
+            set last_event_date = ?
+            where ip = ?"""
+        query_db(sql_string, [time(), ip])
+
+    else:
+        sql_string = """insert into event(ip) values (?);"""
+        query_db(sql_string, [ip], one=True)
+
+    return True

@@ -47,10 +47,11 @@ def query_db(query, args=(), one=False):
     """https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/#easy-querying"""
     with current_app.app_context():
         try:
-            print('Query called from:', inspect.stack()[1][3])
             db = get_db()
             cur = db.execute(query, args)
             r = cur.fetchall()
+            if 'select' not in query:
+                db.commit()
             cur.close()
             if r == []:
                 return None

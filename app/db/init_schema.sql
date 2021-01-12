@@ -27,3 +27,11 @@ create table reply (
     img_uniqid text,
     foreign key(reply_post_id) references post(post_id)
 );
+
+create table event (
+    event_id integer primary key,
+    ip text not null,
+    last_event_date integer default (strftime('%s', 'now')) not null,
+    blacklisted integer default 0 not null,
+    blacklisted_until integer
+);

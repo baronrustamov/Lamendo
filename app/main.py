@@ -3,11 +3,14 @@ import os
 from datetime import datetime
 
 from flask import Flask, abort, redirect, render_template, request, url_for
+from flask_wtf.csrf import CSRFProtect
 import pytz
+import re
 
 from api import (
     create_post,
     create_reply,
+    has_post_privilege,
     get_board_id,
     get_boards,
     get_boards_posts,
@@ -19,20 +22,25 @@ from urls import URLSpace
 from utils import get_new_uniqid, upload_image
 
 app = Flask(__name__)
-
 app.secret_key = str(os.urandom(16))
 
+
+assert os.path.isdir(IMG_PATH)
 app.config['UPLOAD_FOLDER'] = IMG_PATH
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+
 app.config['MAX_CONTENT_LENGTH'] = 3_145_728
 
 with app.app_context():
     app.url_space = URLSpace()
 
 app.config['LOG_FILEPATH'] = LOG_PATH
+os.makedirs(os.path.dirname(app.config['LOG_FILEPATH']), exist_ok=True)
 logging.basicConfig(filename=app.config['LOG_FILEPATH'], level=logging.INFO)
 
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
+csrf = CSRFProtect(app)
 
 eastern = pytz.timezone('US/Eastern')
 
@@ -88,19 +96,31 @@ def board_post(board_acronym, post_id):
     )
 
 
+def get_fields(request):
+    text = request.form.get('form_text')
+    no_space_len = len(re.sub(r'\s', '', text))
+    if no_space_len < 12 or no_space_len > 1_000:
+        text = None
+
+    img_uniqid = get_new_uniqid()
+    img_obj = request.files.get('form_img', None)
+
+    ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    can_post = has_post_privilege(ip)
+    print(can_post)
+
+    return text, img_obj, img_uniqid, can_post
+
+
 @app.route('/<board_acronym>/post', methods=['POST'])
 @URLSpace.validate_board
 def post_form(board_acronym):
     board_id = get_board_id(board_acronym)
-    post = request.form.get('post_upload_text')
+    post, img_obj, img_uniqid, can_post = get_fields(request)
 
-    img_uniqid = get_new_uniqid()
-    img_obj = request.files.get('post_upload_img', None)
-
-    if post and img_obj:
+    if post and img_obj and can_post:
         upload_image(img_obj, img_uniqid)
-        ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-        create_post(board_id, post, img_obj.filename, img_uniqid, ip)
+        create_post(board_id, post, img_obj.filename, img_uniqid)
     else:
         print('Posts require a body of text and an image.')
 
@@ -110,15 +130,11 @@ def post_form(board_acronym):
 @app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
 @URLSpace.validate_board
 def reply_form(board_acronym, post_id):
-    reply = request.form.get('reply_upload_text')
+    reply, img_obj, img_uniqid, can_post = get_fields(request)
 
-    img_uniqid = get_new_uniqid()
-    img_obj = request.files.get('reply_upload_img', None)
-
-    if reply or img_obj:
+    if (reply or (reply and img_obj)) and can_post:
         upload_image(img_obj, img_uniqid)
-        ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-        create_reply(post_id, reply, img_obj.filename, img_uniqid, ip)
+        create_reply(post_id, reply, img_obj.filename, img_uniqid)
     else:
         print('Replies require a body of text or an image.')
 
