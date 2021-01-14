@@ -6,20 +6,21 @@ from flask import Flask, abort, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFProtect
 import pytz
 import re
+from werkzeug.datastructures import FileStorage
 
 from api import (
     create_post,
     create_reply,
-    has_post_privilege,
     get_board_id,
     get_boards,
     get_boards_posts,
     get_post,
     get_post_replies,
 )
-from config import IMG_PATH, LOG_PATH
+from config import IMG_PATH, LOG_PATH, MAX_FILE_SIZE
 from urls import URLSpace
-from utils import get_new_uniqid, upload_image
+from utils import get_new_uid, upload_image, get_username
+from forms import PostCompiler
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(16))
@@ -29,7 +30,7 @@ assert os.path.isdir(IMG_PATH)
 app.config['UPLOAD_FOLDER'] = IMG_PATH
 
 
-app.config['MAX_CONTENT_LENGTH'] = 3_145_728
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
 with app.app_context():
     app.url_space = URLSpace()
@@ -96,33 +97,19 @@ def board_post(board_acronym, post_id):
     )
 
 
-def get_fields(request):
-    text = request.form.get('form_text')
-    no_space_len = len(re.sub(r'\s', '', text))
-    if no_space_len < 12 or no_space_len > 1_000:
-        text = None
-
-    img_uniqid = get_new_uniqid()
-    img_obj = request.files.get('form_img', None)
-
-    ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    can_post = has_post_privilege(ip)
-    print(can_post)
-
-    return text, img_obj, img_uniqid, can_post
-
-
 @app.route('/<board_acronym>/post', methods=['POST'])
 @URLSpace.validate_board
 def post_form(board_acronym):
     board_id = get_board_id(board_acronym)
-    post, img_obj, img_uniqid, can_post = get_fields(request)
+    p = PostCompiler(request, 'form_text', 'form_img', require_text=True, require_img=True)
 
-    if post and img_obj and can_post:
-        upload_image(img_obj, img_uniqid)
-        create_post(board_id, post, img_obj.filename, img_uniqid)
+    msg = 'Post submitted.'
+    if p.valid:
+        upload_image(p.img)
+        create_post(board_id, p.text, p.img, p.user)
     else:
-        print('Posts require a body of text and an image.')
+        msg = p.invalid_message
+    print(msg)
 
     return redirect(url_for('board_catalog', board_acronym=board_acronym))
 
@@ -130,13 +117,15 @@ def post_form(board_acronym):
 @app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
 @URLSpace.validate_board
 def reply_form(board_acronym, post_id):
-    reply, img_obj, img_uniqid, can_post = get_fields(request)
+    p = PostCompiler(request, 'form_text', 'form_img', require_text=True, require_img=False)
 
-    if (reply or (reply and img_obj)) and can_post:
-        upload_image(img_obj, img_uniqid)
-        create_reply(post_id, reply, img_obj.filename, img_uniqid)
+    msg = 'Reply submitted.'
+    if p.valid:
+        upload_image(p.img)
+        create_reply(post_id, p.text, p.img, p.user)
     else:
-        print('Replies require a body of text or an image.')
+        msg = p.invalid_message
+    print(msg)
 
     return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
 

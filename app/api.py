@@ -6,7 +6,6 @@ from typing import NamedTuple
 from db import get_db, query_db
 from utils import get_file_ext, make_date, make_none
 
-
 # Dot notation > dictionary syntax for Jinja templates
 class Board(NamedTuple):
     board_id: int
@@ -20,7 +19,7 @@ class Post(NamedTuple):
     user: str
     post: str
     img_filename: str
-    img_uniqid: str
+    img_uid: str
     img_ext: str
     date: datetime
 
@@ -31,9 +30,10 @@ class Reply(NamedTuple):
     user: str
     reply: str
     img_filename: str
-    img_uniqid: str
+    img_uid: str
     img_ext: str
     date: datetime
+
 
 class Event(NamedTuple):
     event_id: int
@@ -41,6 +41,19 @@ class Event(NamedTuple):
     last_event_date: int
     blacklisted: bool
     blacklisted_until: int
+
+
+def make_event(row):
+    assert isinstance(row['blacklisted'], int)
+    event = Event(
+        row['event_id'],
+        row['ip'],
+        row['last_event_date'],
+        True if row['blacklisted'] == 1 else False,
+        row['blacklisted_until'],
+    )
+    return event
+
 
 def make_post(row):
     if row:
@@ -50,7 +63,7 @@ def make_post(row):
             row['user'],
             row['post'],
             row['img_filename'],
-            row['img_uniqid'],
+            row['img_uid'],
             get_file_ext(row['img_filename']),
             make_date(row['date']),
         )
@@ -74,7 +87,7 @@ def make_replies(rows):
                 r['user'],
                 '' if r['reply'] is None else r['reply'],
                 r['img_filename'],
-                r['img_uniqid'],
+                r['img_uid'],
                 get_file_ext(r['img_filename']),
                 make_date(r['date']),
             )
@@ -137,64 +150,46 @@ def get_board_id(board_acronym):
     return board_id
 
 
-def create_post(post_board_id, post, img_filename, img_uniqid):
+def create_post(post_board_id, text, img, user):
     try:
-        user = 'Anonymous'
-        sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uniqid)
+        sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid)
                             values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
-        img_filename, post = make_none(img_filename, post)
+        img.filename, text = make_none(img.filename, text)
 
         db = get_db()
         cur = db.cursor()
-        cur.execute(sql_string, [post_board_id, user, post, img_filename, img_uniqid])
+        cur.execute(sql_string, [post_board_id, user, text, img.filename, img.uid])
         db.commit()
         cur.close()
     except Exception as e:
         raise ValueError(e) from None
 
 
-def get_username():
-    return f'Anonymous{random.randint(0, 99)}{chr(random.randrange(97, 97 + 26))}'
-
-
-def create_reply(reply_post_id, reply, img_filename, img_uniqid):
-    sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uniqid)
+def create_reply(reply_post_id, text, img, user):
+    sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uid)
                         values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
-    user = get_username()
-    img_filename, reply = make_none(img_filename, reply)
+    img.filename, text = make_none(img.filename, text)
     
-    query_db(sql_string, [reply_post_id, user, reply, img_filename, img_uniqid])
+    query_db(sql_string, [reply_post_id, user, text, img.filename, img.uid])
 
 
-def make_event(row):
-    event = Event(
-        row['event_id'],
-        row['ip'],
-        row['last_event_date'],
-        row['blacklisted'],
-        row['blacklisted_until'],
-    )
-    return event
-
-
-def has_post_privilege(ip):
+def get_event(ip):
     sql_string = """select * from event where ip = ?;"""
     row = query_db(sql_string, [ip], one=True)
     event = make_event(row) if row else None
+    return event
 
-    EVENT_COOLDOWN = 15
+
+def push_event(ip, event=None):
+    if event == None:
+        event = get_event(ip)
+
     if event:
-
-        if event.blacklisted or (time() - EVENT_COOLDOWN < event.last_event_date):
-            return False
-
+        assert ip == event.ip
         sql_string = """update event
             set last_event_date = ?
-            where ip = ?"""
+            where ip = ?;"""
         query_db(sql_string, [time(), ip])
-
     else:
         sql_string = """insert into event(ip) values (?);"""
         query_db(sql_string, [ip], one=True)
-
-    return True

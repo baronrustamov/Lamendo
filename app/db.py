@@ -6,7 +6,6 @@ from flask import current_app, g
 
 from config import DATABASE, INIT_DATA, SCHEMA
 
-
 def init_db():
     """https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/#initial-schemas"""
     with current_app.app_context():

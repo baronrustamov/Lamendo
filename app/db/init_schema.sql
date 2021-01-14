@@ -12,7 +12,7 @@ create table post (
     date text not null,
     post text,
     img_filename text,
-    img_uniqid text,
+    img_uid text,
     foreign key(post_board_id) references board(board_id)
 );
 
@@ -24,14 +24,14 @@ create table reply (
     date text not null,
     reply text,
     img_filename text,
-    img_uniqid text,
+    img_uid text,
     foreign key(reply_post_id) references post(post_id)
 );
 
 create table event (
     event_id integer primary key,
     ip text not null,
-    last_event_date integer default (strftime('%s', 'now')) not null,
-    blacklisted integer default 0 not null,
+    last_event_date integer default (strftime('%s', 'now')) not null,-- seconds since epoch
+    blacklisted integer default 0 not null,-- 0 false, 1 true
     blacklisted_until integer
 );

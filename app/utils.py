@@ -5,8 +5,9 @@ from time import time
 
 from flask import current_app
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
-from config import ALLOWED_FILETYPES
+from config import ALLOWED_FILETYPES, IMG_PATH, LOG_PATH, MIN_POST_LENGTH, MAX_POST_LENGTH, MAX_FILE_SIZE, EVENT_COOLDOWN
 
 
 def make_none(*args):
@@ -19,10 +20,10 @@ def make_none(*args):
     return tuple(l)
 
 
-def get_new_uniqid():
+def get_new_uid():
     # e.g. 0x385a482f97b356[2:]
-    img_uniqid = hex(int(time() * 10_000_000))[2:]
-    return img_uniqid
+    uid = hex(int(time() * 10_000_000))[2:]
+    return uid
 
 
 def get_file_ext(filename):
@@ -35,22 +36,22 @@ def get_file_ext(filename):
     return filename
 
 
-def upload_image(img_obj, img_uniqid):
+def upload_image(img: FileStorage):
     """https://www.reddit.com/r/learnprogramming/comments/gamhq/generating_a_short_unique_id_in_python_similar_to/"""
-    if img_obj and is_file_allowed(img_obj.filename):
+    if img and is_file_allowed(img.filename):
         # >>> secure_filename('file!@#$%^&*.123_name1234..png')
         # 'file.123_name1234..png'
-        filename = secure_filename(img_obj.filename)
+        filename = secure_filename(img.filename)
         # .png
         extension = get_file_ext(filename)
         # 385a482f97b356.png
-        img_stored_filename = img_uniqid + extension
+        img_stored_filename = img.uid + extension
         # path/385a482f97b356.png
         with current_app.app_context():
             img_path = os.path.join(
                 current_app.config['UPLOAD_FOLDER'], img_stored_filename
             )
-        img_obj.save(img_path)
+        img.save(img_path)
         return True
     return False
 
@@ -65,3 +66,14 @@ def is_file_allowed(filename):
 def make_date(val):
     d = datetime.fromisoformat(val)
     return d.strftime('%B %d, %Y %H:%M')
+
+
+def get_username():
+    return get_new_uid()
+
+
+def make_img_from_request(request, name) -> FileStorage:
+    img = request.files.get(name, None)
+    if img:
+        img.uid = get_new_uid()
+    return img
