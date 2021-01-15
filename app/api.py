@@ -147,8 +147,23 @@ def get_boards():
 
 def get_board_id(board_acronym):
     sql_string = 'select board_id from board where board_acronym = ?'
-    board_id = query_db(sql_string, args=[board_acronym], one=True)['board_id']
+    row = query_db(sql_string, args=[board_acronym], one=True)
+    board_id = row['board_id'] if row else None
     return board_id
+
+
+def get_post_id(post_id):
+    sql_string = 'select post_id from post where post_id = ?'
+    row = query_db(sql_string, args=[post_id], one=True)
+    post_id = row['post_id'] if row else None
+    return post_id
+
+
+def get_reply_id(reply_id):
+    sql_string = 'select reply_id from reply where reply_id = ?'
+    row = query_db(sql_string, args=[reply_id], one=True)
+    reply_id = row['reply_id'] if row else None
+    return reply_id
 
 
 def create_post(post_board_id, text, img, user):
@@ -170,6 +185,14 @@ def create_reply(reply_post_id, text, img, user):
     params = [reply_post_id, user, text, filename, uid]
     query_db(sql_string, params)
 
+
+def create_report(post_id, reply_id, text):
+    sql_string = """insert into report(post_id, reply_id, reason)
+                    values (?, ?, ?);"""
+    text = make_none(text)
+    params = [post_id, reply_id, text]
+    query_db(sql_string, params)
+    
 
 def get_event(ip):
     sql_string = """select * from event where ip = ?;"""

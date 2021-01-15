@@ -23,10 +23,11 @@ class PostCompiler:
     def __init__(
         self,
         request,
-        form_text_name,
-        form_img_name,
+        form_text_name=None,
+        form_img_name=None,
         require_text=True,
         require_img=True,
+        validate_text=True
     ):
         self.valid = True
         self.invalid_message = None
@@ -36,6 +37,7 @@ class PostCompiler:
         self.img_name = form_img_name
         self.require_text = require_text
         self.require_img = require_img
+        self.validate_text = validate_text
 
         self.ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
         self.text = request.form.get(form_text_name, None)
@@ -67,8 +69,9 @@ class PostCompiler:
         elif self.require_text and not self.text:
             self.invalid_message = 'No text submitted.'
 
-        elif self.require_text and not self.is_valid_text():
-            self.invalid_message = 'Text lacks quality.'
+        elif self.validate_text:
+            if self.require_text and not self.is_valid_text():
+                self.invalid_message = 'Text lacks quality.'
 
         if self.invalid_message:
             self.valid = False

@@ -86,6 +86,8 @@ def get_username():
 
 def make_img_from_request(request, name) -> FileStorage:
     img = request.files.get(name, None)
+    if not img:
+        return None
     if not is_file_allowed(img.content_type.lower()):
         return None
     if img:

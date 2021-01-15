@@ -1,10 +1,10 @@
 const MAX_POST_LENGTH = 1_000;
-const MIN_POST_LENGTH = 12;
+const MIN_POST_LENGTH = 4;
 const MAX_MB = 3;
 const MAX_FILE_SIZE = MAX_MB * 1024 * 1024;
 
 function output_error_msg(msg){
-    $('#feedback').html(msg);
+    $('#reply_form div[feedback]').html(msg);
 }
 
 function cancel_and_feedback(e, msg){
@@ -16,10 +16,12 @@ $('form').submit(function(e){
 
     const is_post = this.id === 'post_form';
     const is_reply = this.id === 'reply_form';
+    const is_report = this.id === 'report_form';
     
+    // if post or reply form
     if(is_post !== is_reply){
-        let text = $('#form_text').val().replace(/\s/g, '');
-        let files = $('#form_img').prop('files');
+        let text = $("#reply_form [name='form_text']").val().replace(/\s/g, '');
+        let files = $("#reply_form [name='form_img']").prop('files');
 
         if(is_post && (text === '' || files.length !== 1)){
             let msg = 'Posts require text and an image.'
@@ -36,6 +38,15 @@ $('form').submit(function(e){
         if(text.length > MAX_POST_LENGTH){
             let msg = `Post require fewer than ${MAX_POST_LENGTH} characters.`
             cancel_and_feedback(e, msg);
+            return;
+        }
+    }
+    else if(is_report){
+        let text = $("#report_form [name='form_text']").val().replace(/\s/g, '');
+        if(text === ''){
+            let msg = 'Enter a reason for reporting this post.'
+            e.preventDefault();
+            $('#report_form div[feedback]').html(msg);
             return;
         }
     }

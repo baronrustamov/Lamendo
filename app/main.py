@@ -6,6 +6,7 @@ import pytz
 from api import (
     create_post,
     create_reply,
+    create_report,
     get_board_id,
     get_boards,
     get_boards_posts,
@@ -101,35 +102,63 @@ def post_form(board_acronym):
     p = PostCompiler(
         request, 'form_text', 'form_img', require_text=True, require_img=True
     )
-
     msg = 'Post submitted.'
     if p.valid:
         upload_image(p.img)
         create_post(board_id, p.text, p.img, p.user)
     else:
         msg = p.invalid_message
-
-    flash(msg, 'message')
-
+    flash(msg)
     return redirect(url_for('board_catalog', board_acronym=board_acronym))
 
 
 @app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
 @URLSpace.validate_board
+@URLSpace.validate_post
 def reply_form(board_acronym, post_id):
     p = PostCompiler(
         request, 'form_text', 'form_img', require_text=True, require_img=False
     )
-
     msg = 'Reply submitted.'
     if p.valid:
         upload_image(p.img)
         create_reply(post_id, p.text, p.img, p.user)
     else:
         msg = p.invalid_message
+    flash(msg)
+    return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
 
-    flash(msg, 'message')
 
+@app.route('/<board_acronym>/<post_id>/report', methods=['POST'])
+@URLSpace.validate_board
+@URLSpace.validate_post
+def report_post(board_acronym, post_id):
+    p = PostCompiler(
+        request, 'form_text', None, require_text=True, require_img=False, validate_text=False
+    )
+    msg = 'Report submitted.'
+    if p.valid:
+        create_report(post_id, None, p.text)
+    else:
+        msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
+    flash(msg)
+    return redirect(url_for('board_catalog', board_acronym=board_acronym))
+
+
+@app.route('/<board_acronym>/<post_id>/<reply_id>/report', methods=['POST'])
+@URLSpace.validate_board
+@URLSpace.validate_post
+@URLSpace.validate_reply
+def report_reply(board_acronym, post_id, reply_id):
+    p = PostCompiler(
+        request, 'form_text', None, require_text=True, require_img=False, validate_text=False
+    )
+    msg = 'Report submitted.'
+    if p.valid:
+        create_report(post_id, reply_id, p.text)
+    else:
+        msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
+    flash(msg)
     return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
 
 

@@ -24,22 +24,53 @@
   {% if posts %}
     <h3>Posts</h3>
     {% for post in posts %}
-    <a href="{{ url_for('board_post', board_acronym=board_acronym, post_id=post.post_id) }}">
-      <ul>
-        {{ macros.metadata(post) }}
-
-        <div class="img_and_caption">
-          {% if post.img_filename %}
-            <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
-          {% endif %}
-          {% if post %}
-            {{ post.post }}
-          {% endif %}
+      <div class="post">
+        <div class="metadata">
+          <button class="metabutton" report="" report_url="/{{board_acronym}}/{{post.post_id}}/report">>></button>
         </div>
-      </ul>
-    </a>
+        {{ macros.metadata(post) }}
+        <a href="{{ url_for('board_post', board_acronym=board_acronym, post_id=post.post_id) }}">
+          <div class="img_and_caption">
+            {% if post.img_filename %}
+              <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
+            {% endif %}
+            {% if post %}
+              {{ post.post }}
+            {% endif %}
+          </div>
+        </a>
+      </div>
     {% endfor %}
   {% endif %}
 </div>
+
+<div id="report_modal" class="modal">
+  <div report_modal_close="" class="close">&times;</div>
+  <h3>Report</h3>
+  <form id="report_form" action="" method="POST" enctype="multipart/form-data">
+    <div class="modal_form">
+      <textarea class="modal_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="48" placeholder="Report Reason"></textarea>
+    </div>
+    <div feedback=""></div>
+    <input type="submit" value="Submit">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  </form>
+</div>
+
+<script>
+  $(document).ready(function() {
+
+    $('button[report]').click(function() {
+      $('#report_form').attr("action", $(this).attr("report_url"));
+      $('#report_modal').show();
+      $('#report_modal').draggable({ containment: "html", scroll: false });
+    });
+
+    $('div[report_modal_close]').click(function() {
+      $('#report_modal').hide();
+    });
+    
+  });
+</script>
 
 {% endblock %}

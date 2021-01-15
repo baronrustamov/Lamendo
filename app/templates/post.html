@@ -7,52 +7,77 @@
 
 <h3>Post</h3>
 {{ macros.metadata(post) }}
-
 <div class="metadata">
-  <button id="replybutton" data-reply-action="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
+  <button class="metabutton" reply_to_post="" reply_url="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
 </div>
 {{ macros.data(post, "post") }}
 
 
 {% if replies %}
   <h3>Replies</h3>
-  <div class="replies">
-    {% for reply in replies %}
-    
+  {% for reply in replies %}
+    <div class="reply">
+      <div class="metadata">
+        <button class="metabutton" report="" report_url="/{{board_acronym}}/{{post.post_id}}/{{reply.reply_id}}/report">>></button>
+      </div>
       {{ macros.metadata(reply) }}
       {{ macros.data(reply, "reply") }}
-
+    </div>
     {% endfor %}
-  </div>
 {% endif %}
 
-<div class="replymodal">
-  <div id="replybuttonclose" class="close">&times;</div>
+<div id="reply_modal" class="modal">
+  <div reply_modal_close="" class="close">&times;</div>
   <h3>Reply</h3>
-  <form id="reply_form" action="/{{board_acronym}}/{{post.post_id}}/reply" method="POST" enctype="multipart/form-data">
-    <div class="replyform">
-      <textarea id="form_text" class="reply_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="48" placeholder="Reply"></textarea>
+  <form id="reply_form" action="" method="POST" enctype="multipart/form-data">
+    <div class="modal_form">
+      <textarea id="form_text" class="modal_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="48" placeholder="Reply"></textarea>
     </div>
-    <div class="replyform">
-      <input id="form_img" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
+    <div class="modal_form">
+      <input type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
     </div>
-    <div id="feedback"></div>
+    <div feedback=""></div>
     <input type="submit" value="Reply">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
   </form>
 </div>
 
+
+<div id="report_modal" class="modal">
+  <div report_modal_close="" class="close">&times;</div>
+  <h3>Report</h3>
+  <form id="report_form" action="" method="POST" enctype="multipart/form-data">
+    <div class="modal_form">
+      <textarea class="modal_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="48" placeholder="Report Reason"></textarea>
+    </div>
+    <div feedback=""></div>
+    <input type="submit" value="Submit">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  </form>
+</div>
+
+
 <script>
   $(document).ready(function() {
 
-    $('#replybutton').click(function() {
-      $('.replymodal').show();
-      $('#reply_form_id').attr("action", $(this).attr("data-reply-action"));
-      $('.replymodal').draggable({ containment: "html", scroll: false });
+    $('button[reply_to_post]').click(function() {
+      $('#reply_form').attr("action", $(this).attr("reply_url"));
+      $('#reply_modal').show();
+      $('#reply_modal').draggable({ containment: "html", scroll: false });
     });
 
-    $('#replybuttonclose').click(function() {
-      $('.replymodal').hide();
+    $('div[reply_modal_close]').click(function() {
+      $('#reply_modal').hide();
+    });
+    
+    $('button[report]').click(function() {
+      $('#report_form').attr("action", $(this).attr("report_url"));
+      $('#report_modal').show();
+      $('#report_modal').draggable({ containment: "html", scroll: false });
+    });
+
+    $('div[report_modal_close]').click(function() {
+      $('#report_modal').hide();
     });
     
   });
