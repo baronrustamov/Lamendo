@@ -1,5 +1,6 @@
-from api import get_board_acronyms
 from functools import wraps
+
+from api import get_board_acronyms
 from flask import abort, current_app
 
 

@@ -2,12 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-from flask import Flask, abort, redirect, render_template, request, url_for
-from flask_wtf.csrf import CSRFProtect
 import pytz
-import re
-from werkzeug.datastructures import FileStorage
-
 from api import (
     create_post,
     create_reply,
@@ -18,9 +13,11 @@ from api import (
     get_post_replies,
 )
 from config import IMG_PATH, LOG_PATH, MAX_FILE_SIZE
-from urls import URLSpace
-from utils import get_new_uid, upload_image, get_username
+from flask import Flask, abort, flash, redirect, render_template, request, url_for
+from flask_wtf.csrf import CSRFProtect
 from forms import PostCompiler
+from urls import URLSpace
+from utils import upload_image
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(16))
@@ -101,7 +98,9 @@ def board_post(board_acronym, post_id):
 @URLSpace.validate_board
 def post_form(board_acronym):
     board_id = get_board_id(board_acronym)
-    p = PostCompiler(request, 'form_text', 'form_img', require_text=True, require_img=True)
+    p = PostCompiler(
+        request, 'form_text', 'form_img', require_text=True, require_img=True
+    )
 
     msg = 'Post submitted.'
     if p.valid:
@@ -109,7 +108,8 @@ def post_form(board_acronym):
         create_post(board_id, p.text, p.img, p.user)
     else:
         msg = p.invalid_message
-    print(msg)
+
+    flash(msg, 'message')
 
     return redirect(url_for('board_catalog', board_acronym=board_acronym))
 
@@ -117,7 +117,9 @@ def post_form(board_acronym):
 @app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
 @URLSpace.validate_board
 def reply_form(board_acronym, post_id):
-    p = PostCompiler(request, 'form_text', 'form_img', require_text=True, require_img=False)
+    p = PostCompiler(
+        request, 'form_text', 'form_img', require_text=True, require_img=False
+    )
 
     msg = 'Reply submitted.'
     if p.valid:
@@ -125,7 +127,8 @@ def reply_form(board_acronym, post_id):
         create_reply(post_id, p.text, p.img, p.user)
     else:
         msg = p.invalid_message
-    print(msg)
+
+    flash(msg, 'message')
 
     return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
 

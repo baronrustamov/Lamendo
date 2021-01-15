@@ -2,9 +2,9 @@ import inspect
 import os
 import sqlite3
 
+from config import DATABASE, INIT_DATA, SCHEMA
 from flask import current_app, g
 
-from config import DATABASE, INIT_DATA, SCHEMA
 
 def init_db():
     """https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/#initial-schemas"""

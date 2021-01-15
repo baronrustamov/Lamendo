@@ -4,7 +4,8 @@ from time import time
 from typing import NamedTuple
 
 from db import get_db, query_db
-from utils import get_file_ext, make_date, make_none
+from utils import get_file_ext, get_filename_uid_from_img, make_date, make_none
+
 
 # Dot notation > dictionary syntax for Jinja templates
 class Board(NamedTuple):
@@ -151,26 +152,23 @@ def get_board_id(board_acronym):
 
 
 def create_post(post_board_id, text, img, user):
-    try:
-        sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid)
-                            values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
-        img.filename, text = make_none(img.filename, text)
-
-        db = get_db()
-        cur = db.cursor()
-        cur.execute(sql_string, [post_board_id, user, text, img.filename, img.uid])
-        db.commit()
-        cur.close()
-    except Exception as e:
-        raise ValueError(e) from None
+    sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid)
+                        values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+    
+    filename, uid = get_filename_uid_from_img(img)
+    text = make_none(text)
+    params = [post_board_id, user, text, filename, uid]
+    query_db(sql_string, params)
 
 
 def create_reply(reply_post_id, text, img, user):
     sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uid)
                         values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
-    img.filename, text = make_none(img.filename, text)
-    
-    query_db(sql_string, [reply_post_id, user, text, img.filename, img.uid])
+
+    filename, uid = get_filename_uid_from_img(img)
+    text = make_none(text)
+    params = [reply_post_id, user, text, filename, uid]
+    query_db(sql_string, params)
 
 
 def get_event(ip):

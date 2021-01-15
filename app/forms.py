@@ -3,17 +3,31 @@ import re
 from datetime import datetime
 from time import time
 
-from flask import current_app
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
-
-from config import ALLOWED_FILETYPES, IMG_PATH, LOG_PATH, MIN_POST_LENGTH, MAX_POST_LENGTH, MAX_FILE_SIZE, EVENT_COOLDOWN
 from api import get_event, push_event
+from config import (
+    ALLOWED_FILETYPES,
+    EVENT_COOLDOWN,
+    IMG_PATH,
+    LOG_PATH,
+    MAX_FILE_SIZE,
+    MAX_POST_LENGTH,
+    MIN_POST_LENGTH,
+)
+from flask import current_app
+from utils import get_new_uid, get_username, make_img_from_request
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 
-from utils import get_username, get_new_uid, make_img_from_request
 
 class PostCompiler:
-    def __init__(self, request, form_text_name, form_img_name, require_text=True, require_img=True):
+    def __init__(
+        self,
+        request,
+        form_text_name,
+        form_img_name,
+        require_text=True,
+        require_img=True,
+    ):
         self.valid = True
         self.invalid_message = None
 
@@ -24,11 +38,8 @@ class PostCompiler:
         self.require_img = require_img
 
         self.ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-
         self.text = request.form.get(form_text_name, None)
-
         self.img = make_img_from_request(request, form_img_name)
-
         self.user = get_username()
 
         self.event = get_event(self.ip)
@@ -41,14 +52,13 @@ class PostCompiler:
         if no_space_len < MIN_POST_LENGTH or no_space_len > MAX_POST_LENGTH:
             return False
         return True
-    
+
     def set_is_valid(self):
         assert self.invalid_message == None
-
-        if self.event.blacklisted:
+        if self.event and self.event.blacklisted:
             self.invalid_message = 'IP address banned.'
 
-        elif time() - EVENT_COOLDOWN < self.event.last_event_date:
+        elif self.event and (time() - EVENT_COOLDOWN < self.event.last_event_date):
             self.invalid_message = 'Wait 15 seconds between posts.'
 
         elif self.require_img and not self.img:

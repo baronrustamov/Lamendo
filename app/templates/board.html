@@ -30,7 +30,7 @@
 
         <div class="img_and_caption">
           {% if post.img_filename %}
-            <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + post.img_ext)}}"/>
+            <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
           {% endif %}
           {% if post %}
             {{ post.post }}

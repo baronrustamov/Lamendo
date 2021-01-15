@@ -3,20 +3,32 @@ import re
 from datetime import datetime
 from time import time
 
+from config import (
+    ALLOWED_FILETYPES,
+    EVENT_COOLDOWN,
+    IMG_PATH,
+    LOG_PATH,
+    MAX_FILE_SIZE,
+    MAX_POST_LENGTH,
+    MIN_POST_LENGTH,
+)
 from flask import current_app
-from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-
-from config import ALLOWED_FILETYPES, IMG_PATH, LOG_PATH, MIN_POST_LENGTH, MAX_POST_LENGTH, MAX_FILE_SIZE, EVENT_COOLDOWN
+from werkzeug.utils import secure_filename
 
 
 def make_none(*args):
+    if args is None:
+        return args
+
     l = []
     for arg in args:
         if arg == '':
             l.append(None)
         else:
             l.append(arg)
+    if len(args) == 1:
+        return l[0]
     return tuple(l)
 
 
@@ -28,7 +40,7 @@ def get_new_uid():
 
 def get_file_ext(filename):
     if filename:
-        ext = '.' + filename.split('.')[-1].lower()
+        ext = filename.split('.')[-1].lower()
         if (ext not in ALLOWED_FILETYPES) or (not isinstance(ext, str)):
             msg = str(ext) + ' not in ' + str(ALLOWED_FILETYPES)
             raise ValueError(msg)
@@ -45,7 +57,7 @@ def upload_image(img: FileStorage):
         # .png
         extension = get_file_ext(filename)
         # 385a482f97b356.png
-        img_stored_filename = img.uid + extension
+        img_stored_filename = img.uid + '.' + extension
         # path/385a482f97b356.png
         with current_app.app_context():
             img_path = os.path.join(
@@ -74,6 +86,16 @@ def get_username():
 
 def make_img_from_request(request, name) -> FileStorage:
     img = request.files.get(name, None)
+    if not is_file_allowed(img.content_type.lower()):
+        return None
     if img:
         img.uid = get_new_uid()
     return img
+
+
+def get_filename_uid_from_img(img):
+    filename, uid = None, None
+    if img:
+        filename = make_none(img.filename)
+        uid = img.uid
+    return filename, uid

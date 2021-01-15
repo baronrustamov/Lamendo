@@ -4,7 +4,7 @@ INIT_DATA = 'db/init_data.sql'
 IMG_PATH = './static/img_uploads/'
 LOG_PATH = './logs/app.log'
 
-ALLOWED_FILETYPES = {'.png', '.jpg', '.jpeg', '.gif'}
+ALLOWED_FILETYPES = {'png', 'jpg', 'jpeg', 'gif'}
 MAX_MB = 3
 MAX_FILE_SIZE = MAX_MB * 1024 * 1024
 MIN_POST_LENGTH = 12
