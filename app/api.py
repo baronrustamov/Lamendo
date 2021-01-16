@@ -169,7 +169,7 @@ def get_reply_id(reply_id):
 def create_post(post_board_id, text, img, user):
     sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid)
                         values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
-    
+
     filename, uid = get_filename_uid_from_img(img)
     text = make_none(text)
     params = [post_board_id, user, text, filename, uid]
@@ -192,7 +192,7 @@ def create_report(post_id, reply_id, text):
     text = make_none(text)
     params = [post_id, reply_id, text]
     query_db(sql_string, params)
-    
+
 
 def get_event(ip):
     sql_string = """select * from event where ip = ?;"""
