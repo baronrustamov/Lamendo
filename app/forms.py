@@ -27,7 +27,7 @@ class PostCompiler:
         form_img_name=None,
         require_text=True,
         require_img=True,
-        validate_text=True
+        validate_text=True,
     ):
         self.valid = True
         self.invalid_message = None

@@ -134,7 +134,12 @@ def reply_form(board_acronym, post_id):
 @URLSpace.validate_post
 def report_post(board_acronym, post_id):
     p = PostCompiler(
-        request, 'form_text', None, require_text=True, require_img=False, validate_text=False
+        request,
+        'form_text',
+        None,
+        require_text=True,
+        require_img=False,
+        validate_text=False,
     )
     msg = 'Report submitted.'
     if p.valid:
@@ -151,7 +156,12 @@ def report_post(board_acronym, post_id):
 @URLSpace.validate_reply
 def report_reply(board_acronym, post_id, reply_id):
     p = PostCompiler(
-        request, 'form_text', None, require_text=True, require_img=False, validate_text=False
+        request,
+        'form_text',
+        None,
+        require_text=True,
+        require_img=False,
+        validate_text=False,
     )
     msg = 'Report submitted.'
     if p.valid:
