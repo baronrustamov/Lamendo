@@ -1,0 +1,10 @@
+{% if request.path != url_for('home') %}
+<div class="nav">
+  {% if post %}
+  <h4><a href="{{url_for('board_catalog', board_acronym=board_acronym)}}">{{board_acronym}}'s Catalog</a></h4>
+  {% else %}
+  <div></div>
+  {% endif %}
+  <h4><a href="{{url_for('home')}}">Board Catalog</a></h4>
+</div>
+{% endif %}

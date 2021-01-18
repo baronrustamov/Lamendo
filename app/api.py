@@ -7,7 +7,7 @@ from db import get_db, query_db
 from utils import get_file_ext, get_filename_uid_from_img, make_date, make_none
 
 
-# Dot notation > dictionary syntax for Jinja templates
+# NamedTuples because dot notation > dictionary syntax for Jinja templates
 class Board(NamedTuple):
     board_id: int
     board_acronym: str
