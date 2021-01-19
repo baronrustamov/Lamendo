@@ -12,6 +12,7 @@ create table post (
     post text,
     img_filename text,
     img_uid text,
+    ip text not null,
     foreign key(post_board_id) references board(board_id)
 );
 
@@ -23,6 +24,7 @@ create table reply (
     reply text,
     img_filename text,
     img_uid text,
+    ip text not null,
     foreign key(reply_post_id) references post(post_id)
 );
 

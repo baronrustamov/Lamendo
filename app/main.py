@@ -105,7 +105,7 @@ def post_form(board_acronym):
     msg = 'Post submitted.'
     if p.valid:
         upload_image(p.img)
-        create_post(board_id, p.text, p.img, p.user)
+        create_post(board_id, p.text, p.img, p.user, p.ip)
     else:
         msg = p.invalid_message
     flash(msg)
@@ -122,7 +122,7 @@ def reply_form(board_acronym, post_id):
     msg = 'Reply submitted.'
     if p.valid:
         upload_image(p.img)
-        create_reply(post_id, p.text, p.img, p.user)
+        create_reply(post_id, p.text, p.img, p.user, p.ip)
     else:
         msg = p.invalid_message
     flash(msg)

@@ -166,23 +166,23 @@ def get_reply_id(reply_id):
     return reply_id
 
 
-def create_post(post_board_id, text, img, user):
-    sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid)
-                        values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+def create_post(post_board_id, text, img, user, ip):
+    sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid, ip)
+                        values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?, ?);"""
 
     filename, uid = get_filename_uid_from_img(img)
     text = make_none(text)
-    params = [post_board_id, user, text, filename, uid]
+    params = [post_board_id, user, text, filename, uid, ip]
     query_db(sql_string, params)
 
 
-def create_reply(reply_post_id, text, img, user):
-    sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uid)
-                        values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?);"""
+def create_reply(reply_post_id, text, img, user, ip):
+    sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uid, ip)
+                        values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?, ?);"""
 
     filename, uid = get_filename_uid_from_img(img)
     text = make_none(text)
-    params = [reply_post_id, user, text, filename, uid]
+    params = [reply_post_id, user, text, filename, uid, ip]
     query_db(sql_string, params)
 
 
