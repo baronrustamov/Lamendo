@@ -1,5 +1,7 @@
 # Image Board
 
+## Preview
+
 > ## Boards
 >Containers for different subjects.
 
@@ -21,3 +23,11 @@
 
 ![Post](resources/post.png)
 
+
+## Getting Started
+
+`pip install requirements.txt`
+
+`cd app`
+
+`py main.py`
