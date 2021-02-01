@@ -9,7 +9,7 @@
 </div>
 {{ macros.metadata(post) }}
 <div class="metadata">
-  <button class="metabutton" reply_to_post="" reply_url="/{{board_acronym}}/{{post.post_id}}/reply">reply</button>
+  <button class="metabutton" reply_to_post="" reply_url="/{{board_acronym}}/{{post.post_id}}/reply">Reply</button>
 </div>
 {{ macros.data(post, "post") }}
 
@@ -17,14 +17,28 @@
 {% if replies %}
   <h3>Replies</h3>
   {% for reply in replies %}
-    <div class="reply">
+    <div id="c{{reply.user}}" class="reply">
+
       <div class="metadata">
         <button class="metabutton" report="" report_url="/{{board_acronym}}/{{post.post_id}}/{{reply.reply_id}}/report">>></button>
       </div>
+
       {{ macros.metadata(reply) }}
+
+      <div class="metadata">
+        <button class="metabutton" reply_to_reply="" reply_url="/{{board_acronym}}/{{post.post_id}}/{{reply.reply_id}}/reply">Reply</button>
+      </div>
+
+      {% for child in reply.children %}
+        <a href="#c{{child}}" jump_link="c{{child}}" class="jump_link">{{ child }}</a>
+      {% endfor %}
+
+      <div class="link_hover_reply"></div>
+
       {{ macros.data(reply, "reply") }}
+
     </div>
-    {% endfor %}
+  {% endfor %}
 {% endif %}
 
 <div id="reply_modal" class="modal">
@@ -71,6 +85,7 @@
       $('#reply_modal').hide();
     });
     
+
     $('button[report]').click(function() {
       $('#report_form').attr("action", $(this).attr("report_url"));
       $('#report_modal').show();
@@ -80,7 +95,53 @@
     $('div[report_modal_close]').click(function() {
       $('#report_modal').hide();
     });
+
+
+    $('button[reply_to_reply]').click(function() {
+      $('#reply_form').attr("action", $(this).attr("reply_url"));
+      $('#reply_modal').show();
+      $('#reply_modal').draggable({ containment: "html", scroll: false });
+    });
+
     
+    var default_color = $('div .reply').css("background");
+    var hover_color = '#132638';
+
+    $('a[jump_link]').hover(jumpLinkHoverOn, jumpLinkHoverOff);
+
+    function jumpLinkHoverOn() {
+      var target_id = "#" + $(this).attr("jump_link");
+      var reply = $(target_id);
+      reply.css({'background': hover_color});
+      $(this).siblings('.link_hover_reply').html(reply.clone());
+    }
+
+    function jumpLinkHoverOff() {
+      var target_id = "#" + $(this).attr("jump_link");
+      var reply = $(target_id);
+      reply.css({'background': default_color});
+      $(this).siblings('.link_hover_reply').last().html('');
+      $(target_id).css({'background': default_color});
+    }
+
+    $('a[jump_link]').click(function() {
+      var target_id = "#" + $(this).attr("jump_link");
+      var reply = $(target_id);
+
+      // disable hover temporarily to get a lasting highlight effect
+      $('a[jump_link]').unbind('mouseenter mouseleave');
+
+      reply.css({'background-color': hover_color});
+      $(this).siblings('.link_hover_reply').last().html('');
+
+      setTimeout(function() {
+        $(target_id).css({'background': default_color});
+        $('a[jump_link]').bind('mouseenter', jumpLinkHoverOn);
+        $('a[jump_link]').bind('mouseleave', jumpLinkHoverOff);
+      }, 1000);
+    });
+
+
   });
 </script>
 

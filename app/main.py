@@ -6,6 +6,7 @@ import pytz
 from api import (
     create_post,
     create_reply,
+    create_reply_to_reply,
     create_report,
     get_board_id,
     get_boards,
@@ -168,6 +169,29 @@ def report_reply(board_acronym, post_id, reply_id):
         create_report(post_id, reply_id, p.text)
     else:
         msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
+    flash(msg)
+    return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
+
+
+@app.route('/<board_acronym>/<post_id>/<reply_id>/reply', methods=['POST'])
+@URLSpace.validate_board
+@URLSpace.validate_post
+@URLSpace.validate_reply
+def reply_to_reply(board_acronym, post_id, reply_id):
+    p = PostCompiler(
+        request,
+        'form_text',
+        'form_img',
+        require_text=True,
+        require_img=False,
+        validate_text=False,
+    )
+    msg = 'Reply submitted.'
+    if p.valid:
+        upload_image(p.img)
+        create_reply_to_reply(post_id, reply_id, p.text, p.img, p.user, p.ip)
+    else:
+        msg = p.invalid_message if p.invalid_message else 'Could not submit reply.'
     flash(msg)
     return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
 

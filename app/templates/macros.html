@@ -1,10 +1,15 @@
 {% macro metadata(record) %}
   <div class="metadata">
-    {{ record.date + " " + record.user }}
-    {% if record.img_filename %}
-      {{record.img_filename}}
-    {% endif %}
+    {{ record.date }}
   </div>
+  <div class="metadata">
+    {{ record.user }}
+  </div>
+  {% if record.img_filename %}
+    <div class="metadata">
+      {{record.img_filename}}
+    </div>
+  {% endif %}
 {% endmacro %}
 
 

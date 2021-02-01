@@ -19,6 +19,7 @@ create table post (
 create table reply (
     reply_id integer primary key,
     reply_post_id integer,
+    parent_reply_id integer,
     user text not null,
     date text not null,
     reply text,

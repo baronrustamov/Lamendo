@@ -77,7 +77,7 @@ def is_file_allowed(filename):
 
 def make_date(val):
     d = datetime.fromisoformat(val)
-    return d.strftime('%B %d, %Y %H:%M')
+    return d.strftime('%b %d, %Y %I:%M %p').replace(' AM', 'am').replace(' PM', 'pm')
 
 
 def get_username():

@@ -1,11 +1,11 @@
 import random
 from datetime import datetime
 from time import time
-from typing import NamedTuple
+from typing import NamedTuple, List
 
 from db import get_db, query_db
 from utils import get_file_ext, get_filename_uid_from_img, make_date, make_none
-
+from pprint import pprint
 
 # NamedTuples because dot notation > dictionary syntax for Jinja templates
 class Board(NamedTuple):
@@ -28,6 +28,8 @@ class Post(NamedTuple):
 class Reply(NamedTuple):
     reply_id: int
     reply_post_id: int
+    parent_reply_id: int
+    children: List
     user: str
     reply: str
     img_filename: str
@@ -83,8 +85,10 @@ def make_replies(rows):
         replies = []
         for r in rows:
             _r = Reply(
-                r['reply_id'],
-                r['reply_post_id'],
+                int(r['reply_id']),
+                int(r['reply_post_id']),
+                None if not r['parent_reply_id'] else int(r['parent_reply_id']),
+                [],
                 r['user'],
                 '' if r['reply'] is None else r['reply'],
                 r['img_filename'],
@@ -119,10 +123,23 @@ def get_post_replies(post_id):
     sql_string = """
         select reply.*
         from reply
-        where reply.reply_post_id = ?;
+        where reply.reply_post_id = ?
+        order by reply_id;
     """
     rows = query_db(sql_string, args=[post_id])
-    return make_replies(rows)
+    
+    replies = make_replies(rows)
+    if replies is None:
+        return None
+
+    replies = {reply.reply_id: reply for reply in replies}
+    
+    children_index = 3
+    for reply in replies.values():
+        if reply.parent_reply_id is not None:
+            replies[reply.parent_reply_id][children_index].append(reply.user)
+
+    return replies.values()
 
 
 def get_boards_posts(board_acronym):
@@ -176,13 +193,31 @@ def create_post(post_board_id, text, img, user, ip):
     query_db(sql_string, params)
 
 
-def create_reply(reply_post_id, text, img, user, ip):
+def create_reply(post_id, text, img, user, ip):
     sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uid, ip)
                         values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?, ?);"""
 
     filename, uid = get_filename_uid_from_img(img)
     text = make_none(text)
-    params = [reply_post_id, user, text, filename, uid, ip]
+    params = [post_id, user, text, filename, uid, ip]
+    query_db(sql_string, params)
+
+
+def create_reply_to_reply(post_id, parent_reply_id, text, img, user, ip):
+    """
+    Replies and replies to replies go in the same SQLite table.
+
+        reply_id   parent_reply_id     text
+        1          null                drawing is fun!
+        2          1                   what did you draw?
+        3          2                   a pink elephant.
+        4          1                   drawing takes too much patience.
+    """
+    sql_string = """insert into reply(reply_post_id, parent_reply_id, user, date, reply, img_filename, img_uid, ip)
+                        values (?, ?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?, ?);"""
+    filename, uid = get_filename_uid_from_img(img)
+    text = make_none(text)
+    params = [post_id, parent_reply_id, user, text, filename, uid, ip]
     query_db(sql_string, params)
 
 

@@ -40,14 +40,14 @@ body {
 }
 
 .reply{
-    background-color: #1b1b1b;
+    background-color: #161616;
     padding: 10px;
     border-radius: 3px;
     margin-bottom: 10px;
 }
 
 .post{
-    background-color: #1b1b1b;
+    background-color: #161616;
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 3px;
@@ -62,7 +62,7 @@ body {
 }
 
 .close {
-    color: #aaaaaa;
+    color: #111111;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -82,8 +82,8 @@ div {
 
 .img_and_caption{
     display: flex;
-    padding-top: 5px;
-    padding-bottom: 20px;
+    padding-top: 15px;
+    padding-bottom: 10px;
     padding-left: 20px;
     padding-right: 20px;
 }
@@ -95,6 +95,22 @@ a{
 
 a:visited{
     color: #c6c8c6;
+}
+
+.jump_link {
+    text-decoration: underline;
+    color:rgb(39, 151, 114);
+    padding: 2px;
+}
+
+.jump_link:visited {
+    text-decoration: underline;
+    color:rgb(39, 151, 114);
+    padding: 2px;
+}
+
+.link_hover_reply {
+    background: #132638;
 }
 
 .nav{
