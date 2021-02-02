@@ -104,38 +104,45 @@
     });
 
     
-    var default_color = $('div .reply').css("background");
-    var hover_color = '#132638';
+    var reply_display_on_hover_color_default = $('div .reply').css("background");
+    var reply_display_on_hover_color = '#132638';
+
+    var jump_link_color_default = $('.jump_link').css("color");
+    var jump_link_color_hover = 'rgb(31, 114, 86)'
 
     $('a[jump_link]').hover(jumpLinkHoverOn, jumpLinkHoverOff);
 
     function jumpLinkHoverOn() {
-      var target_id = "#" + $(this).attr("jump_link");
-      var reply = $(target_id);
-      reply.css({'background': hover_color});
+      $(this).css({'color': jump_link_color_hover});
+
+      const target_id = "#" + $(this).attr("jump_link");
+      const reply = $(target_id);
+      reply.css({'background': reply_display_on_hover_color});
+      
       $(this).siblings('.link_hover_reply').html(reply.clone());
     }
 
     function jumpLinkHoverOff() {
-      var target_id = "#" + $(this).attr("jump_link");
-      var reply = $(target_id);
-      reply.css({'background': default_color});
+      $(this).css({'color': jump_link_color_default})
+
+      const target_id = "#" + $(this).attr("jump_link");
+
       $(this).siblings('.link_hover_reply').last().html('');
-      $(target_id).css({'background': default_color});
+      $(target_id).css({'background': reply_display_on_hover_color_default});
     }
 
     $('a[jump_link]').click(function() {
-      var target_id = "#" + $(this).attr("jump_link");
-      var reply = $(target_id);
-
-      // disable hover temporarily to get a lasting highlight effect
-      $('a[jump_link]').unbind('mouseenter mouseleave');
-
-      reply.css({'background-color': hover_color});
+      
+      $(this).css({'color': jump_link_color_default})
       $(this).siblings('.link_hover_reply').last().html('');
+      $(this).unbind('mouseenter mouseleave');
+      
+      const target_id = "#" + $(this).attr("jump_link");
+      const reply = $(target_id);
+      reply.css({'background-color': reply_display_on_hover_color});
 
       setTimeout(function() {
-        $(target_id).css({'background': default_color});
+        reply.css({'background': reply_display_on_hover_color_default});
         $('a[jump_link]').bind('mouseenter', jumpLinkHoverOn);
         $('a[jump_link]').bind('mouseleave', jumpLinkHoverOff);
       }, 1000);
