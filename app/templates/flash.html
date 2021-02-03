@@ -1,7 +1,21 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-            <div class="flash">{{ message }}</div>
+        <nav class="flash_nav" id="flash_close">
+            <div>
+                {{ message }}
+            </div>
+        </nav>
         {% endfor %}
     {% endif %}
 {% endwith %}
+
+<script>
+    $(document).ready(function() {
+  
+      $('#flash_close').click(function() {
+        $(this).hide();
+      });
+      
+    });
+  </script>

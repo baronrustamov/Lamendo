@@ -48,8 +48,18 @@ body {
 .post{
     background-color: #161616;
     padding: 10px;
-    margin-bottom: 10px;
+    margin: 10px;
     border-radius: 3px;
+    width: 200px;
+    height: 300px;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .title {
@@ -86,6 +96,16 @@ div {
     padding-right: 20px;
 }
 
+.post_img_and_caption{
+    display: flex;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    word-break: break-all;
+}
+
 .formatted_text {
     word-break: break-all;
     white-space: pre-line;
@@ -119,9 +139,7 @@ a:visited{
 }
 
 .jump_link:visited {
-    text-decoration: underline;
     color:rgb(39, 151, 114);
-    padding: 2px;
 }
 
 .nav{
@@ -130,9 +148,11 @@ a:visited{
 }
 
 img {
-    margin-right: 10px;
-    padding-top: 0px;
     width: 200px;
+}
+
+.image_buffer {
+    padding-right: 10px;
 }
 
 ul {
@@ -141,20 +161,21 @@ ul {
     border-radius: 3px;
 }
 
-.modal_textarea{
-    max-width: 700px;
+.modal_textarea {
+    max-width: 800px;
     max-height: 500px;
     background-color : #1d1f21;
     color: #f1f1f1;
     font-family: arial,helvetica,sans-serif;
     font-size: 10pt;
-    border: 1px solid #CCC;
+    border: 1px solid rgb(160, 160, 160);
+    padding: 4px;
 }
 
-.modal{
+.modal {
     max-width: 900px;
-    max-height: 500px;
-    border: 1px solid #CCC;
+    max-height: 600px;
+    border: 1px solid rgb(160, 160, 160);
     padding: 12px;
     display: none;
     position: fixed;
@@ -162,12 +183,17 @@ ul {
     margin: 0 auto;
     top: 35%;
     background-color: #1d1f21;
+    cursor: move;
 }
 
-.flash{
-    padding: 6px;
+
+.flash_nav {
+    padding: 4px;
+    color: black;
     background-color: rgb(42, 190, 141);
     border: solid rgb(39, 151, 114);
     border-radius: 3px;
-    color: black;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
 }

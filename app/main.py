@@ -45,6 +45,11 @@ csrf = CSRFProtect(app)
 eastern = pytz.timezone('US/Eastern')
 
 
+@app.errorhandler(Exception)
+def all_exception_handler(error):
+   return 'Internal Server Error', 500
+
+
 @app.after_request
 def after_request(response):
     env = request.environ

@@ -58,9 +58,11 @@ $('form').submit(function(e){
 });
 
 $('#form_img').change(function() {
+    $('.postform #feedback').html('');
+
     if(this.files[0].size > MAX_FILE_SIZE){
-    msg = `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024} MB.`
-    this.value = null;
-    output_error_msg(msg);
+        let msg = `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024} MB.`
+        $('.postform #feedback').html(msg);
+        this.value = null;
     };
 });
