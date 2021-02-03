@@ -46,7 +46,7 @@
   <h3>Reply</h3>
   <form id="reply_form" action="" method="POST" enctype="multipart/form-data">
     <div class="modal_form">
-      <textarea id="form_text" class="modal_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="48" placeholder="Reply"></textarea>
+      <textarea id="form_text" class="modal_textarea" maxlength="500" type="text" name="form_text" rows="8" cols="48" placeholder="Reply"></textarea>
     </div>
     <div class="modal_form">
       <input type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
@@ -63,7 +63,7 @@
   <h3>Report</h3>
   <form id="report_form" action="" method="POST" enctype="multipart/form-data">
     <div class="modal_form">
-      <textarea class="modal_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="48" placeholder="Report Reason"></textarea>
+      <textarea class="modal_textarea" maxlength="500" type="text" name="form_text" rows="8" cols="48" placeholder="Report Reason"></textarea>
     </div>
     <div feedback=""></div>
     <input type="submit" value="Submit">
@@ -78,7 +78,7 @@
     $('button[reply_to_post]').click(function() {
       $('#reply_form').attr("action", $(this).attr("reply_url"));
       $('#reply_modal').show();
-      $('#reply_modal').draggable({ containment: "html", scroll: false });
+      $('#reply_modal').draggable({containment: "html"});
     });
 
     $('div[reply_modal_close]').click(function() {
@@ -89,7 +89,7 @@
     $('button[report]').click(function() {
       $('#report_form').attr("action", $(this).attr("report_url"));
       $('#report_modal').show();
-      $('#report_modal').draggable({ containment: "html", scroll: false });
+      $('#report_modal').draggable({containment: "html"});
     });
 
     $('div[report_modal_close]').click(function() {
@@ -100,7 +100,7 @@
     $('button[reply_to_reply]').click(function() {
       $('#reply_form').attr("action", $(this).attr("reply_url"));
       $('#reply_modal').show();
-      $('#reply_modal').draggable({ containment: "html", scroll: false });
+      $('#reply_modal').draggable({containment: "html"});
     });
 
     

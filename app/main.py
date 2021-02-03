@@ -101,7 +101,9 @@ def board_post(board_acronym, post_id):
 def post_form(board_acronym):
     board_id = get_board_id(board_acronym)
     p = PostCompiler(
-        request, 'form_text', 'form_img', require_text=True, require_img=True
+        request,
+        'form_text',
+        'form_img',
     )
     msg = 'Post submitted.'
     if p.valid:
@@ -118,7 +120,10 @@ def post_form(board_acronym):
 @URLSpace.validate_post
 def reply_form(board_acronym, post_id):
     p = PostCompiler(
-        request, 'form_text', 'form_img', require_text=True, require_img=False
+        request,
+        'form_text',
+        'form_img',
+        require_img=False,
     )
     msg = 'Reply submitted.'
     if p.valid:
@@ -138,9 +143,8 @@ def report_post(board_acronym, post_id):
         request,
         'form_text',
         None,
-        require_text=True,
+        require_text=False,
         require_img=False,
-        validate_text=False,
     )
     msg = 'Report submitted.'
     if p.valid:
@@ -160,9 +164,8 @@ def report_reply(board_acronym, post_id, reply_id):
         request,
         'form_text',
         None,
-        require_text=True,
+        require_text=False,
         require_img=False,
-        validate_text=False,
     )
     msg = 'Report submitted.'
     if p.valid:
@@ -182,9 +185,7 @@ def reply_to_reply(board_acronym, post_id, reply_id):
         request,
         'form_text',
         'form_img',
-        require_text=True,
         require_img=False,
-        validate_text=False,
     )
     msg = 'Reply submitted.'
     if p.valid:

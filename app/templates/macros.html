@@ -13,8 +13,6 @@
 {% endmacro %}
 
 
-
-
 {% macro data(record, type) %}
   <div class="img_and_caption">
     {% if record.img_filename %}
@@ -22,12 +20,10 @@
         <img src="{{url_for('static', filename='img_uploads/' + record.img_uid +'.' +  record.img_ext)}}"/>
       </a>
     {% endif %}
-    
-    {% if type == "reply" %}
-      {{ record.reply }}
-    {% else %}
-      {{ record.post }}
-    {% endif %}
-
+      {% if type == "reply" %}
+        <div class="formatted_text">{{ record.reply }}</div>
+      {% else %}
+        <div class="formatted_text">{{ record.post }}</div>
+      {% endif %}
   </div>
 {% endmacro %}

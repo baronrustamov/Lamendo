@@ -12,6 +12,7 @@ from config import (
     MAX_FILE_SIZE,
     MAX_POST_LENGTH,
     MIN_POST_LENGTH,
+    MAX_POST_ROWS
 )
 from flask import current_app
 from utils import get_new_uid, get_username, make_img_from_request
@@ -23,11 +24,14 @@ class PostCompiler:
     def __init__(
         self,
         request,
+
         form_text_name=None,
         form_img_name=None,
+
         require_text=True,
-        require_img=True,
         validate_text=True,
+
+        require_img=True,
     ):
         self.valid = True
         self.invalid_message = None
@@ -49,29 +53,34 @@ class PostCompiler:
 
         self.set_is_valid()
 
-    def is_valid_text(self):
-        no_space_len = len(re.sub(r'\s', '', self.text))
-        if no_space_len < MIN_POST_LENGTH or no_space_len > MAX_POST_LENGTH:
-            return False
-        return True
+    def is_invalid_text(self):
+        text_len = len(self.text)
+        if text_len < MIN_POST_LENGTH or text_len > MAX_POST_LENGTH:
+            return f'Text must be between {MIN_POST_LENGTH} and {MAX_POST_LENGTH} characters.'
+
+        text_row_count = self.text.count('\n')
+        if text_row_count > MAX_POST_ROWS:
+            return f'Text must have fewer than {MAX_POST_ROWS} rows.'
+
+        return False
 
     def set_is_valid(self):
         assert self.invalid_message == None
         if self.event and self.event.blacklisted:
-            self.invalid_message = 'IP address banned.'
-
+                self.invalid_message = 'IP address banned.'
+        
         elif self.event and (time() - EVENT_COOLDOWN < self.event.last_event_date):
-            self.invalid_message = 'Wait 15 seconds between posts.'
+                self.invalid_message = 'Wait 15 seconds between posts.'
 
-        elif self.require_img and not self.img:
-            self.invalid_message = 'No image submitted.'
+        elif self.require_img:
+            if not self.img:
+                self.invalid_message = 'No image submitted.'
 
-        elif self.require_text and not self.text:
-            self.invalid_message = 'No text submitted.'
-
-        elif self.validate_text:
-            if self.require_text and not self.is_valid_text():
-                self.invalid_message = 'Text lacks quality.'
+        elif self.require_text:
+            if not self.text:
+                self.invalid_message = 'No text submitted.'
+            elif self.validate_text:
+                self.invalid_message = self.is_invalid_text()
 
         if self.invalid_message:
             self.valid = False
