@@ -8,7 +8,7 @@
   <h3>Create Post</h3>
   <form method="POST" id="post_form" action="/{{board_acronym}}/post" enctype="multipart/form-data">
     <div class="postform">
-      <textarea id="form_text" class="modal_textarea" maxlength="500" type="text" name="form_text" rows="4" cols="40"></textarea>
+      <textarea id="form_text" class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="4" cols="40"></textarea>
     </div>
     <div class="postform">
       <input id="form_img" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
@@ -38,11 +38,11 @@
               <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
             {% endif %}
             {% if post %}
-              {{ post.post }}
+              <div class="formatted_text padding">{{ post.post }}</div>
             {% endif %}
           </div>
         </a>
-        
+
       </div>
       {% endfor %}
       </div>
@@ -54,7 +54,7 @@
   <h3>Report</h3>
   <form id="report_form" action="" method="POST" enctype="multipart/form-data">
     <div class="modal_form">
-      <textarea class="modal_textarea" maxlength="500" type="text" name="form_text" rows="8" cols="48" placeholder="Report Reason"></textarea>
+      <textarea class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48" placeholder="Report Reason"></textarea>
     </div>
     <div feedback=""></div>
     <input type="submit" value="Submit">

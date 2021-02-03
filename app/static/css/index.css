@@ -12,6 +12,7 @@ h1 {
     border-radius: 2px;
     padding: 3px;
     display: inline-block;
+    margin: 2px;
 }
 
 .metabutton{
@@ -51,7 +52,7 @@ body {
     margin: 10px;
     border-radius: 3px;
     width: 200px;
-    height: 300px;
+    max-height: 350px;
     overflow: hidden;
 }
 
@@ -60,6 +61,7 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: flex-start;
 }
 
 .title {
@@ -151,8 +153,12 @@ img {
     width: 200px;
 }
 
-.image_buffer {
+.right_padding {
     padding-right: 10px;
+}
+
+.padding {
+    padding: 4px;
 }
 
 ul {
@@ -174,7 +180,7 @@ ul {
 
 .modal {
     max-width: 900px;
-    max-height: 600px;
+    max-height: 700px;
     border: 1px solid rgb(160, 160, 160);
     padding: 12px;
     display: none;

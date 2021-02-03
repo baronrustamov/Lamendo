@@ -1,4 +1,4 @@
-const MAX_POST_LENGTH = 1_000;
+const MAX_POST_LENGTH = 1_500;
 const MIN_POST_LENGTH = 4;
 const MAX_MB = 3;
 const MAX_FILE_SIZE = MAX_MB * 1024 * 1024;
@@ -23,6 +23,8 @@ $('form').submit(function(e){
         let text = $("#reply_form [name='form_text']").val().replace(/\s/g, '');
         let files = $("#reply_form [name='form_img']").prop('files');
 
+        alert(text.length)
+
         if(is_post && (text === '' || files.length !== 1)){
             let msg = 'Posts require text and an image.'
             cancel_and_feedback(e, msg);
@@ -30,13 +32,13 @@ $('form').submit(function(e){
         }
         
         if(text.length < MIN_POST_LENGTH){
-            let msg = 'Post text doesn\'t have enough quality. Add some substance.'
+            let msg = `Post too short. ${MIN_POST_LENGTH} characters is the min.`
             cancel_and_feedback(e, msg);
             return;
         }
         
         if(text.length > MAX_POST_LENGTH){
-            let msg = `Post require fewer than ${MAX_POST_LENGTH} characters.`
+            let msg = `Post too long. ${MAX_POST_LENGTH} characters is the max.`
             cancel_and_feedback(e, msg);
             return;
         }

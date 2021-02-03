@@ -54,7 +54,8 @@ class PostCompiler:
         self.set_is_valid()
 
     def is_invalid_text(self):
-        text_len = len(self.text)
+        text_len = len(re.sub(r'\s', '', self.text))
+        print(text_len)
         if text_len < MIN_POST_LENGTH or text_len > MAX_POST_LENGTH:
             return f'Text must be between {MIN_POST_LENGTH} and {MAX_POST_LENGTH} characters.'
 

@@ -112,8 +112,10 @@ def post_form(board_acronym):
     )
     msg = 'Post submitted.'
     if p.valid:
-        upload_image(p.img)
-        create_post(board_id, p.text, p.img, p.user, p.ip)
+        if upload_image(p.img):
+            create_post(board_id, p.text, p.img, p.user, p.ip)
+        else:
+            msg = 'Trouble uploading image.'
     else:
         msg = p.invalid_message
     flash(msg)

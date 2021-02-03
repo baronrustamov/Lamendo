@@ -16,7 +16,7 @@
 {% macro data(record, type) %}
   <div class="img_and_caption">
     {% if record.img_filename %}
-      <div class="image_buffer">
+      <div class="right_padding">
         <a href="{{url_for('static', filename='img_uploads/' + record.img_uid + '.' + record.img_ext)}}">
           <img src="{{url_for('static', filename='img_uploads/' + record.img_uid +'.' +  record.img_ext)}}"/>
         </a>
