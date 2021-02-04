@@ -55,13 +55,12 @@ class PostCompiler:
 
     def is_invalid_text(self):
         text_len = len(re.sub(r'\s', '', self.text))
-        print(text_len)
         if text_len < MIN_POST_LENGTH or text_len > MAX_POST_LENGTH:
-            return f'Text must be between {MIN_POST_LENGTH} and {MAX_POST_LENGTH} characters.'
+            return f'Min characters ({MIN_POST_LENGTH}). Max characters ({MAX_POST_LENGTH}).'
 
         text_row_count = self.text.count('\n')
         if text_row_count > MAX_POST_ROWS:
-            return f'Text must have fewer than {MAX_POST_ROWS} rows.'
+            return f'Max rows ({MAX_POST_ROWS})'
 
         return False
 

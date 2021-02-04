@@ -45,9 +45,9 @@ csrf = CSRFProtect(app)
 eastern = pytz.timezone('US/Eastern')
 
 
-@app.errorhandler(Exception)
-def all_exception_handler(error):
-   return 'Internal Server Error', 500
+# @app.errorhandler(Exception)
+# def all_exception_handler(error):
+#    return 'Internal Server Error', 500
 
 
 @app.after_request
@@ -77,14 +77,14 @@ def favicon():
 @app.route('/')
 def home():
     boards = get_boards()
-    return render_template('home.html', boards=boards)
+    return render_template('boards.html', boards=boards)
 
 
 @app.route('/<board_acronym>')
 @URLSpace.validate_board
 def board_catalog(board_acronym):
     posts = get_boards_posts(board_acronym)
-    return render_template('board.html', board_acronym=board_acronym, posts=posts)
+    return render_template('catalog.html', board_acronym=board_acronym, posts=posts)
 
 
 @app.route('/<board_acronym>/<post_id>')

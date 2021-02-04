@@ -29,6 +29,7 @@ class Reply(NamedTuple):
     reply_id: int
     reply_post_id: int
     parent_reply_id: int
+    parent_user: List
     children: List
     user: str
     reply: str
@@ -89,6 +90,7 @@ def make_replies(rows):
                 int(r['reply_post_id']),
                 None if not r['parent_reply_id'] else int(r['parent_reply_id']),
                 [],
+                [],
                 r['user'],
                 '' if r['reply'] is None else r['reply'],
                 r['img_filename'],
@@ -127,17 +129,19 @@ def get_post_replies(post_id):
         order by reply_id;
     """
     rows = query_db(sql_string, args=[post_id])
-    
-    replies = make_replies(rows)
-    if replies is None:
+    if not rows:
         return None
 
+    replies = make_replies(rows)
     replies = {reply.reply_id: reply for reply in replies}
     
-    children_index = 3
+    parent_user_index = 3
+    children_index = 4
+    user_index = 5
     for reply in replies.values():
         if reply.parent_reply_id is not None:
             replies[reply.parent_reply_id][children_index].append(reply.user)
+            replies[reply.reply_id][parent_user_index].append(replies[reply.parent_reply_id][user_index])
 
     return replies.values()
 

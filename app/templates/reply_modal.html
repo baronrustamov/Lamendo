@@ -1,0 +1,38 @@
+
+<div id="reply_modal" class="modal">
+  <div id="reply_modal_close" class="close">&times;</div>
+  <h3>Reply</h3>
+  <form id="reply_form" action="" method="POST" enctype="multipart/form-data">
+    <textarea id="form_text_reply" class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48" placeholder="Reply"></textarea>
+    <input id="form_img_reply" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
+    <div id="feedback_reply"></div>
+    <input type="submit" value="Reply">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  </form>
+</div>
+
+<script>
+  $(document).ready(function() {
+
+    function reply_init(this_obj){
+      $('#report_modal').hide();
+      $('#reply_form').attr("action", $(this_obj).attr("reply_url"));
+      $('#reply_modal').show();
+      $('#reply_modal').draggable({containment: "html"});
+    }
+
+    $('button[reply_to_post]').click(function() {
+      reply_init(this);
+    });
+
+    $('#reply_modal_close').click(function() {
+      $('#reply_modal').hide();
+    });
+
+    $('button[reply_to_reply]').click(function() {
+      reply_init(this);
+    });
+    
+  });
+
+</script>

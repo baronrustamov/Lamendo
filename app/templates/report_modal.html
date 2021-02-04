@@ -1,0 +1,28 @@
+
+<div id="report_modal" class="modal">
+  <div id="modal_close_report" class="close">&times;</div>
+  <h3>Report</h3>
+  <form id="report_form" action="" method="POST" enctype="multipart/form-data">
+    <textarea class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48" placeholder="Report Reason"></textarea>
+    <div id="feedback_report"></div>
+    <input type="submit" value="Submit">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  </form>
+</div>
+
+
+<script>
+  $(document).ready(function() {
+    $('button[report]').click(function() {
+      $('#reply_modal').hide();
+
+      $('#report_form').attr("action", $(this).attr("report_url"));
+      $('#report_modal').show();
+      $('#report_modal').draggable({containment: "html"});
+    });
+
+    $('#modal_close_report').click(function() {
+      $('#report_modal').hide();
+    });
+  });
+</script>

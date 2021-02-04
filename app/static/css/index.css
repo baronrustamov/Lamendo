@@ -68,10 +68,6 @@ body {
     text-align: center;
 }
 
-.postform{
-    display: block;
-}
-
 .close {
     color: #111111;
     float: right;
@@ -113,7 +109,7 @@ div {
     white-space: pre-line;
 }
 
-.link_hover_reply {
+.preview {
     position: absolute;
     transform: translate(0, 0);
     opacity: 1;
@@ -142,6 +138,23 @@ a:visited{
 
 .jump_link:visited {
     color:rgb(39, 151, 114);
+}
+
+.jump_link:hover {
+    color: rgb(31, 114, 86);
+}
+
+.parent_link {
+    text-decoration: underline;
+    color:rgb(60, 122, 173);
+}
+
+.parent_link:visited {
+    color:rgb(60, 122, 173);
+}
+
+.parent_link:hover {
+    color:rgb(48, 97, 138);
 }
 
 .nav{
@@ -176,6 +189,7 @@ ul {
     font-size: 10pt;
     border: 1px solid rgb(160, 160, 160);
     padding: 4px;
+    display: block;
 }
 
 .modal {
@@ -191,7 +205,6 @@ ul {
     background-color: #1d1f21;
     cursor: move;
 }
-
 
 .flash_nav {
     padding: 4px;
