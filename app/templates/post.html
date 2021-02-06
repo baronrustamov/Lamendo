@@ -29,11 +29,10 @@
           <div class="metadata">
             <button class="metabutton" reply_to_reply="" reply_url="/{{board_acronym}}/{{post.post_id}}/{{reply.reply_id}}/reply">Reply</button>
           </div>
-
           {% for child in reply.children %}
             <a href="#c{{child}}" jump_link="c{{child}}" class="jump_link">{{ child }}</a>
           {% endfor %}
-          
+
           <div class="preview"></div>
 
           {{ macros.data(reply, "reply") }}
@@ -51,20 +50,24 @@
     var preview_hover_color_default = $('div .reply').css("background");
     var preview_hover_color = '#132638';
 
+    function get_link_parent(link_type, reply){
+      let p = link_type === "jump_link" ? reply.parent() : reply.parent().parent();
+      return p;
+    }
 
     function hover_init(link_type, this_obj, sibling_class_target){
       const target_id = "#" + $(this_obj).attr(link_type);
       const reply = $(target_id);
-      reply.css({'background': preview_hover_color});
+      get_link_parent(link_type, reply).css({'background': preview_hover_color});
 
-      $(this_obj).siblings(sibling_class_target).html(reply.clone());
+      $(this_obj).siblings(sibling_class_target).html(reply.clone().addClass('padding10'),);
     }
 
     function hover_del(link_type, this_obj, sibling_class_target){
       const target_id = "#" + $(this_obj).attr(link_type);
       
       $(this_obj).siblings(sibling_class_target).last().html('');
-      $(target_id).css({'background': preview_hover_color_default});
+      get_link_parent(link_type, $(target_id)).css({'background': preview_hover_color_default});
     }
 
     function goToPreview(link_target, link_type, this_obj, sibling_class_target){
@@ -73,10 +76,10 @@
       
       const target_id = "#" + $(this_obj).attr(link_type);
       const reply = $(target_id);
-      reply.css({'background-color': preview_hover_color});
+      get_link_parent(link_type, $(target_id)).css({'background-color': preview_hover_color});
   
       setTimeout(function() {
-        reply.css({'background': preview_hover_color_default});
+        get_link_parent(link_type, $(target_id)).css({'background': preview_hover_color_default});
 
         if(link_type=="jump_link"){
           $(link_target).bind('mouseenter', jump_link_hover_on);
