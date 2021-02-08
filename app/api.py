@@ -134,14 +134,16 @@ def get_post_replies(post_id):
 
     replies = make_replies(rows)
     replies = {reply.reply_id: reply for reply in replies}
-    
+
     parent_user_index = 3
     children_index = 4
     user_index = 5
     for reply in replies.values():
         if reply.parent_reply_id is not None:
             replies[reply.parent_reply_id][children_index].append(reply.user)
-            replies[reply.reply_id][parent_user_index].append(replies[reply.parent_reply_id][user_index])
+            replies[reply.reply_id][parent_user_index].append(
+                replies[reply.parent_reply_id][user_index]
+            )
 
     return replies.values()
 

@@ -12,25 +12,38 @@ from config import (
     MAX_FILE_SIZE,
     MAX_POST_LENGTH,
     MIN_POST_LENGTH,
-    MAX_POST_ROWS
+    MAX_POST_ROWS,
 )
 from flask import current_app
 from utils import get_new_uid, get_username, make_img_from_request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
+from flask_wtf import FlaskForm
+from wtforms import Form, StringField, TextAreaField, validators
+
+
+class FeedbackForm(FlaskForm):
+    subject = StringField(
+        'Subject', [validators.Length(min=1, max=64), validators.InputRequired()]
+    )
+    message = TextAreaField(
+        'Message',
+        [
+            validators.Length(min=MIN_POST_LENGTH, max=MAX_POST_LENGTH),
+            validators.InputRequired(),
+        ],
+    )
+
 
 class PostCompiler:
     def __init__(
         self,
         request,
-
         form_text_name=None,
         form_img_name=None,
-
         require_text=True,
         validate_text=True,
-
         require_img=True,
     ):
         self.valid = True
@@ -67,10 +80,10 @@ class PostCompiler:
     def set_is_valid(self):
         assert self.invalid_message == None
         if self.event and self.event.blacklisted:
-                self.invalid_message = 'IP address banned.'
-        
+            self.invalid_message = 'IP address banned.'
+
         elif self.event and (time() - EVENT_COOLDOWN < self.event.last_event_date):
-                self.invalid_message = 'Wait 15 seconds between posts.'
+            self.invalid_message = 'Wait 15 seconds between posts.'
 
         elif self.require_img:
             if not self.img:

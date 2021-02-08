@@ -1,0 +1,16 @@
+<h2>Feedback</h2>
+
+<form method="POST" action="{{url_for('home')}}">
+  <div>{{ form.subject.label }}: {{ form.subject(class_="modal_textarea", size="32", maxlength="64") }}</div>
+  <div>{{ form.message.label }}: {{ form.message(class_="modal_textarea", cols="48", rows="8", maxlength="1500") }}</div>
+  {% if form.errors %}
+    {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+      {% for error in field_errors %}
+        <div>{{ form[field_name].label }}: {{ error }}</div>
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  <input type="submit" value="Submit">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+</form>
+

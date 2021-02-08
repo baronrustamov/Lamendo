@@ -14,10 +14,10 @@ from api import (
     get_post,
     get_post_replies,
 )
-from config import IMG_PATH, LOG_PATH, MAX_FILE_SIZE
+from config import IMG_PATH, LOG_PATH, MAX_FILE_SIZE, RULES
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFProtect
-from forms import PostCompiler
+from forms import PostCompiler, FeedbackForm
 from urls import URLSpace
 from utils import upload_image
 
@@ -74,10 +74,17 @@ def favicon():
     return app.send_static_file('favicon.ico')
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
     boards = get_boards()
-    return render_template('boards.html', boards=boards)
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        subject = form.subject.data
+        message = form.message.data
+        msg = 'Thank you for your feedback!'
+        flash(msg)
+        return redirect(url_for('home'))
+    return render_template('home.html', boards=boards, form=form, rules=RULES)
 
 
 @app.route('/<board_acronym>')
@@ -105,11 +112,7 @@ def board_post(board_acronym, post_id):
 @URLSpace.validate_board
 def post_form(board_acronym):
     board_id = get_board_id(board_acronym)
-    p = PostCompiler(
-        request,
-        'form_text',
-        'form_img',
-    )
+    p = PostCompiler(request, 'form_text', 'form_img',)
     msg = 'Post submitted.'
     if p.valid:
         if upload_image(p.img):
@@ -126,12 +129,7 @@ def post_form(board_acronym):
 @URLSpace.validate_board
 @URLSpace.validate_post
 def reply_form(board_acronym, post_id):
-    p = PostCompiler(
-        request,
-        'form_text',
-        'form_img',
-        require_img=False,
-    )
+    p = PostCompiler(request, 'form_text', 'form_img', require_img=False,)
     msg = 'Reply submitted.'
     if p.valid:
         upload_image(p.img)
@@ -146,13 +144,7 @@ def reply_form(board_acronym, post_id):
 @URLSpace.validate_board
 @URLSpace.validate_post
 def report_post(board_acronym, post_id):
-    p = PostCompiler(
-        request,
-        'form_text',
-        None,
-        require_text=False,
-        require_img=False,
-    )
+    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False,)
     msg = 'Report submitted.'
     if p.valid:
         create_report(post_id, None, p.text)
@@ -167,13 +159,7 @@ def report_post(board_acronym, post_id):
 @URLSpace.validate_post
 @URLSpace.validate_reply
 def report_reply(board_acronym, post_id, reply_id):
-    p = PostCompiler(
-        request,
-        'form_text',
-        None,
-        require_text=False,
-        require_img=False,
-    )
+    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False,)
     msg = 'Report submitted.'
     if p.valid:
         create_report(post_id, reply_id, p.text)
@@ -188,12 +174,7 @@ def report_reply(board_acronym, post_id, reply_id):
 @URLSpace.validate_post
 @URLSpace.validate_reply
 def reply_to_reply(board_acronym, post_id, reply_id):
-    p = PostCompiler(
-        request,
-        'form_text',
-        'form_img',
-        require_img=False,
-    )
+    p = PostCompiler(request, 'form_text', 'form_img', require_img=False,)
     msg = 'Reply submitted.'
     if p.valid:
         upload_image(p.img)

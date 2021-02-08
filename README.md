@@ -1,4 +1,6 @@
-# Image Board
+# Lamendo
+
+Lamendo is an online bulletin board.
 
 ## Preview
 
