@@ -1,6 +1,6 @@
-DATABASE = 'db/sqlite_img_board_db.db'
-SCHEMA = 'db/init_schema.sql'
-INIT_DATA = 'db/init_data.sql'
+DATABASE = 'db/lamendo.db'
+SCHEMA = 'db/schema.sql'
+INIT_DATA = 'db/data.sql'
 IMG_PATH = './static/img_uploads/'
 LOG_PATH = './logs/app.log'
 
@@ -14,13 +14,14 @@ EVENT_COOLDOWN = 10
 
 
 RULES = (
-    'You will not upload, post, discuss, request, or link any content that violates your local, Canadian, or United States law.',
+    'You will not upload, post, discuss, request, or link any content that violates your local, or Canadian, law.',
     'You will immediately stop using this site if you are under the age of 18.',
     'You will not post or request personal information about yourself or other users (ie. no \"doxxing\").',
     'High quality content is encouraged, distasteful content may be removed, and may result in a ban.',
-    'No spamming, or intentionally evading spam, or content submission filters.',
+    'No spamming, or intentionally evading spam or content submission filters.',
     'Any form of business advertising is not welcome.',
-    'The use of scrapers, bots, or other automated posting, or downloading scripts, is prohibited.',
-    'No posting content from proxies, or Tor.',
+    'The use of scrapers, bots, or other automated posting or downloading scripts is prohibited.',
+    'No posting content using proxies or Tor.',
     'No uploading images containing additional data including: embedded sounds, documents, archives, etc.',
+    'Exceptions to these rules may be granted for testing purposes.'
 )

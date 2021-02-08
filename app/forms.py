@@ -56,7 +56,7 @@ class PostCompiler:
         self.require_img = require_img
         self.validate_text = validate_text
 
-        self.ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+        self.ip = PostCompiler.get_ip_from_request(self.request)
         self.text = request.form.get(form_text_name, None)
         self.img = make_img_from_request(request, form_img_name)
         self.user = get_username()
@@ -65,6 +65,10 @@ class PostCompiler:
         push_event(self.ip, event=self.event)
 
         self.set_is_valid()
+
+    @staticmethod
+    def get_ip_from_request(request):
+        return request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
 
     def is_invalid_text(self):
         text_len = len(re.sub(r'\s', '', self.text))

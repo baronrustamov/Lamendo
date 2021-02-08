@@ -15,9 +15,9 @@ class URLSpace:
     def validate_board(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            board_acronym = kwargs['board_acronym']
+            board_name = kwargs['board_name']
             with current_app.app_context():
-                if not current_app.url_space.valid_board_acronym(board_acronym):
+                if not current_app.url_space.valid_board_acronym(board_name):
                     abort(404)
             return fn(*args, **kwargs)
 

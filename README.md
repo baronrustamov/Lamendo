@@ -1,29 +1,15 @@
-# Lamendo
+<div style="text-align:center">
+    <img src="resources/lamendo.png" alt="Lamendo" width="500"/>
+</div>
 
-Lamendo is an online bulletin board.
+<br>
+<br>
 
-## Preview
+## Overview
 
-> ## Boards
->Containers for different subjects.
-
-![Boards](resources/boards.png)
-
-<br/>
-<br/>
-
->## Catalogs
->Preview all the posts on a board, or create a new one.
-
-![Catalog](resources/catalog.png)
-
-<br/>
-<br/>
-
->## Posts
->Discuss the contents of a post.
-
-![Post](resources/post.png)
+Lamendo is an online bulletin board system (BBS) made using Flask and SQLite. There are some outdated examples of what it looks like in the resources folder. I plan on deploying this online by the end of February 2021. More coming soon!
+<br>
+<br>
 
 
 ## Getting Started

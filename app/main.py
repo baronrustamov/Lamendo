@@ -8,6 +8,7 @@ from api import (
     create_reply,
     create_reply_to_reply,
     create_report,
+    create_feedback,
     get_board_id,
     get_boards,
     get_boards_posts,
@@ -81,22 +82,24 @@ def home():
     if form.validate_on_submit():
         subject = form.subject.data
         message = form.message.data
+        ip = PostCompiler.get_ip_from_request(request)
+        create_feedback(subject, message, ip)
         msg = 'Thank you for your feedback!'
         flash(msg)
         return redirect(url_for('home'))
     return render_template('home.html', boards=boards, form=form, rules=RULES)
 
 
-@app.route('/<board_acronym>')
+@app.route('/<board_name>')
 @URLSpace.validate_board
-def board_catalog(board_acronym):
-    posts = get_boards_posts(board_acronym)
-    return render_template('catalog.html', board_acronym=board_acronym, posts=posts)
+def board_catalog(board_name):
+    posts = get_boards_posts(board_name)
+    return render_template('catalog.html', board_name=board_name, posts=posts)
 
 
-@app.route('/<board_acronym>/<post_id>')
+@app.route('/<board_name>/<post_id>')
 @URLSpace.validate_board
-def board_post(board_acronym, post_id):
+def board_post(board_name, post_id):
     post = get_post(post_id)
     if not post:
         abort(404)
@@ -104,15 +107,15 @@ def board_post(board_acronym, post_id):
     replies = get_post_replies(post_id)
 
     return render_template(
-        'post.html', board_acronym=board_acronym, post=post, replies=replies
+        'post.html', board_name=board_name, post=post, replies=replies
     )
 
 
-@app.route('/<board_acronym>/post', methods=['POST'])
+@app.route('/<board_name>/post', methods=['POST'])
 @URLSpace.validate_board
-def post_form(board_acronym):
-    board_id = get_board_id(board_acronym)
-    p = PostCompiler(request, 'form_text', 'form_img',)
+def post_form(board_name):
+    board_id = get_board_id(board_name)
+    p = PostCompiler(request, 'form_text', 'form_img')
     msg = 'Post submitted.'
     if p.valid:
         if upload_image(p.img):
@@ -122,14 +125,14 @@ def post_form(board_acronym):
     else:
         msg = p.invalid_message
     flash(msg)
-    return redirect(url_for('board_catalog', board_acronym=board_acronym))
+    return redirect(url_for('board_catalog', board_name=board_name))
 
 
-@app.route('/<board_acronym>/<post_id>/reply', methods=['POST'])
+@app.route('/<board_name>/<post_id>/reply', methods=['POST'])
 @URLSpace.validate_board
 @URLSpace.validate_post
-def reply_form(board_acronym, post_id):
-    p = PostCompiler(request, 'form_text', 'form_img', require_img=False,)
+def reply_form(board_name, post_id):
+    p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
     msg = 'Reply submitted.'
     if p.valid:
         upload_image(p.img)
@@ -137,44 +140,44 @@ def reply_form(board_acronym, post_id):
     else:
         msg = p.invalid_message
     flash(msg)
-    return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
-@app.route('/<board_acronym>/<post_id>/report', methods=['POST'])
+@app.route('/<board_name>/<post_id>/report', methods=['POST'])
 @URLSpace.validate_board
 @URLSpace.validate_post
-def report_post(board_acronym, post_id):
-    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False,)
+def report_post(board_name, post_id):
+    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False)
     msg = 'Report submitted.'
     if p.valid:
-        create_report(post_id, None, p.text)
+        create_report(post_id, None, p.text, p.ip)
     else:
         msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
     flash(msg)
-    return redirect(url_for('board_catalog', board_acronym=board_acronym))
+    return redirect(url_for('board_catalog', board_name=board_name))
 
 
-@app.route('/<board_acronym>/<post_id>/<reply_id>/report', methods=['POST'])
+@app.route('/<board_name>/<post_id>/<reply_id>/report', methods=['POST'])
 @URLSpace.validate_board
 @URLSpace.validate_post
 @URLSpace.validate_reply
-def report_reply(board_acronym, post_id, reply_id):
-    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False,)
+def report_reply(board_name, post_id, reply_id):
+    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False)
     msg = 'Report submitted.'
     if p.valid:
-        create_report(post_id, reply_id, p.text)
+        create_report(post_id, reply_id, p.text, p.ip)
     else:
         msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
     flash(msg)
-    return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
-@app.route('/<board_acronym>/<post_id>/<reply_id>/reply', methods=['POST'])
+@app.route('/<board_name>/<post_id>/<reply_id>/reply', methods=['POST'])
 @URLSpace.validate_board
 @URLSpace.validate_post
 @URLSpace.validate_reply
-def reply_to_reply(board_acronym, post_id, reply_id):
-    p = PostCompiler(request, 'form_text', 'form_img', require_img=False,)
+def reply_to_reply(board_name, post_id, reply_id):
+    p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
     msg = 'Reply submitted.'
     if p.valid:
         upload_image(p.img)
@@ -182,7 +185,7 @@ def reply_to_reply(board_acronym, post_id, reply_id):
     else:
         msg = p.invalid_message if p.invalid_message else 'Could not submit reply.'
     flash(msg)
-    return redirect(url_for('board_post', board_acronym=board_acronym, post_id=post_id))
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
 if __name__ == '__main__':

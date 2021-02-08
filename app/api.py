@@ -10,7 +10,7 @@ from pprint import pprint
 # NamedTuples because dot notation > dictionary syntax for Jinja templates
 class Board(NamedTuple):
     board_id: int
-    board_acronym: str
+    board_name: str
     board_description: str
 
 
@@ -104,11 +104,11 @@ def make_replies(rows):
 
 def get_board_acronyms():
     sql_string = """
-        select board_acronym
+        select board_name
         from board;
     """
     rows = query_db(sql_string)
-    return set(row['board_acronym'] for row in rows)
+    return set(row['board_name'] for row in rows)
 
 
 def get_post(post_id):
@@ -148,16 +148,16 @@ def get_post_replies(post_id):
     return replies.values()
 
 
-def get_boards_posts(board_acronym):
+def get_boards_posts(board_name):
     sql_string = """
         select post.*
         from board
             left join post on board.board_id = post.post_board_id
-        where board_acronym = ?
+        where board_name = ?
         and post.post_id is not null
         order by post_id;
     """
-    rows = query_db(sql_string, args=[board_acronym])
+    rows = query_db(sql_string, args=[board_name])
     return make_posts(rows)
 
 
@@ -168,9 +168,9 @@ def get_boards():
     return boards
 
 
-def get_board_id(board_acronym):
-    sql_string = 'select board_id from board where board_acronym = ?'
-    row = query_db(sql_string, args=[board_acronym], one=True)
+def get_board_id(board_name):
+    sql_string = 'select board_id from board where board_name = ?'
+    row = query_db(sql_string, args=[board_name], one=True)
     board_id = row['board_id'] if row else None
     return board_id
 
@@ -227,11 +227,19 @@ def create_reply_to_reply(post_id, parent_reply_id, text, img, user, ip):
     query_db(sql_string, params)
 
 
-def create_report(post_id, reply_id, text):
-    sql_string = """insert into report(post_id, reply_id, reason)
-                    values (?, ?, ?);"""
+def create_report(post_id, reply_id, text, ip):
+    sql_string = """insert into report(post_id, reply_id, reason, ip)
+                    values (?, ?, ?, ?);"""
     text = make_none(text)
-    params = [post_id, reply_id, text]
+    params = [post_id, reply_id, text, ip]
+    query_db(sql_string, params)
+
+
+def create_feedback(subject, message, ip):
+    sql_string = """insert into feedback(subject, message, ip)
+                    values (?, ?, ?);"""
+    subject, message = make_none(subject, message)
+    params = [subject, message, ip]
     query_db(sql_string, params)
 
 

@@ -3,10 +3,10 @@
 
 {% block body %}
 
-<h2 class="title">{{board_acronym}}</h2>
+<h2 class="title">{{board_name}}</h2>
 <div>
   <h3>Create Post</h3>
-  <form id="post_form" method="POST" action="/{{board_acronym}}/post" enctype="multipart/form-data">
+  <form id="post_form" method="POST" action="/{{board_name}}/post" enctype="multipart/form-data">
     <textarea id="form_text" class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48"></textarea>
     <input id="form_img_post" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
     <div id="feedback_post"></div>
@@ -23,10 +23,10 @@
       <div class="post">
         
         <div class="metadata">
-          <button class="metabutton" report="" report_url="/{{board_acronym}}/{{post.post_id}}/report">>></button>
+          <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/report">>></button>
         </div>
 
-        <a href="{{ url_for('board_post', board_acronym=board_acronym, post_id=post.post_id) }}">
+        <a href="{{ url_for('board_post', board_name=board_name, post_id=post.post_id) }}">
           
           {{ macros.metadata(post) }}
 

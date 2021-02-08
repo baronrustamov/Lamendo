@@ -178,10 +178,15 @@ img {
     padding: 10px;
 }
 
-ul {
+.inline {
+    display: inline-block;
+}
+
+.wrapper {
     padding: 10px;
     background-color: #292a2e;
     border-radius: 3px;
+    margin: 4px;
 }
 
 .modal_textarea {

@@ -1,6 +1,6 @@
 create table board (
     board_id integer primary key,
-    board_acronym text not null,
+    board_name text not null,
     board_description text not null
 );
 
@@ -42,7 +42,8 @@ create table report (
     post_id integer,
     reply_id integer,
     date text default (datetime('now')) not null,
-    reason text not null
+    reason text not null,
+    ip text not null
 );
 
 create table admin (
@@ -50,4 +51,11 @@ create table admin (
     username text not null,
     password text not null,
     role integer not null
+);
+
+create table feedback (
+	feedback_id	integer primary key,
+	subject	text,
+	message	text not null,
+	ip text not null
 );

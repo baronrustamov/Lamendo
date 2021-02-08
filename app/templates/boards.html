@@ -1,11 +1,8 @@
-
 <h2>Boards</h2>
 {% for board in boards %}
-  <div>
-    <ul>
-      <a href="/{{board.board_acronym}}">
-        /{{board.board_acronym}}/ - {{board.board_description}}
+  <div class="wrapper inline">
+      <a href="/{{board.board_name}}">
+        {{board.board_name}}
       </a>
-    </ul>
   </div>
 {% endfor %}

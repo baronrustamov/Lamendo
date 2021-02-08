@@ -5,11 +5,11 @@
 
 <h3>Post</h3>
 <div class="metadata">
-  <button class="metabutton" report="" report_url="/{{board_acronym}}/{{post.post_id}}/report">>></button>
+  <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/report">>></button>
 </div>
 {{ macros.metadata(post) }}
 <div class="metadata">
-  <button class="metabutton" reply_to_post="" reply_url="/{{board_acronym}}/{{post.post_id}}/reply">Reply</button>
+  <button class="metabutton" reply_to_post="" reply_url="/{{board_name}}/{{post.post_id}}/reply">Reply</button>
 </div>
 {{ macros.data(post, "post") }}
 
@@ -21,13 +21,13 @@
     <div id="c{{reply.user}}">
       <div id="p{{reply.reply_id}}">
           <div class="metadata">
-            <button class="metabutton" report="" report_url="/{{board_acronym}}/{{post.post_id}}/{{reply.reply_id}}/report">>></button>
+            <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/{{reply.reply_id}}/report">>></button>
           </div>
 
           {{ macros.metadata(reply) }}
 
           <div class="metadata">
-            <button class="metabutton" reply_to_reply="" reply_url="/{{board_acronym}}/{{post.post_id}}/{{reply.reply_id}}/reply">Reply</button>
+            <button class="metabutton" reply_to_reply="" reply_url="/{{board_name}}/{{post.post_id}}/{{reply.reply_id}}/reply">Reply</button>
           </div>
           {% for child in reply.children %}
             <a href="#c{{child}}" jump_link="c{{child}}" class="jump_link">{{ child }}</a>
