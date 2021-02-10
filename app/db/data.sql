@@ -51,8 +51,8 @@ insert into report(post_id, reply_id, date, category, message, ip)
 
 
 
-insert into feedback(subject, message, ip)
-    values ('Critique', 'Colours dont match well', '1.2.3.4');
+insert into feedback(date, subject, message, ip)
+    values (strftime('%Y-%m-%d %H:%M', 'now'), 'Critique', 'Colours dont match well', '1.2.3.4');
 
 
 

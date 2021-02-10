@@ -36,3 +36,11 @@ REPORTS = [
     'Something is broken.',
     'Other.',
 ]
+
+
+FEEDBACK_MSG = 'Thank you for your feedback!'
+POST_MSG = 'Post submitted!'
+REPLY_MSG = 'Reply submitted!'
+REPORT_MSG = 'Report submitted.'
+BANNED_MSG = 'Cannot post. Your IP address has been banned.'
+COOLDOWN_MSG = 'Wait at least 15 seconds before posting again.'

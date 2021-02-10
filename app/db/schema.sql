@@ -56,6 +56,7 @@ create table admin (
 
 create table feedback (
 	feedback_id	integer primary key,
+    date text default (datetime('now')) not null,
 	subject	text,
 	message	text not null,
 	ip text not null

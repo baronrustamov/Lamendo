@@ -1,26 +1,37 @@
 import logging
 import os
 from datetime import datetime
+from functools import wraps
 
 import pytz
 from api import (
+    create_feedback,
     create_post,
     create_reply,
     create_reply_to_reply,
     create_report,
-    create_feedback,
     get_board_id,
     get_boards,
     get_boards_posts,
     get_post,
     get_post_replies,
+    is_valid_ip,
 )
-from config import IMG_PATH, LOG_PATH, MAX_FILE_SIZE, RULES
+from config import (
+    FEEDBACK_MSG,
+    IMG_PATH,
+    LOG_PATH,
+    MAX_FILE_SIZE,
+    POST_MSG,
+    REPLY_MSG,
+    REPORT_MSG,
+    RULES,
+)
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFProtect
-from forms import PostCompiler, FeedbackForm, ReportForm
+from forms import FeedbackForm, PostCompiler, ReportForm
 from urls import URLSpace
-from utils import upload_image
+from utils import get_ip_from_request, upload_image
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(16))
@@ -75,28 +86,60 @@ def favicon():
     return app.send_static_file('favicon.ico')
 
 
+def validate_ip_for_post_request(redirect_to):
+    """All functions accepting POST requests should use this
+    to ensure banned IP addresses cannot submit forms to the site.
+    Ban appeal forms are an exception.
+
+    `redirect_to`: name of the function you want to route to
+    if a bad IP is encountered.
+
+    NOTE: using this will require the operand function to have an
+    addition field for the ip address.
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            ip = get_ip_from_request(request)
+            kwargs['ip'] = ip
+            if request.method == 'POST':
+                ip_status, msg = is_valid_ip(ip)
+                if not ip_status:
+                    flash(msg)
+                    return redirect(url_for(redirect_to, **kwargs))
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 @app.route('/', methods=['GET', 'POST'])
-def home():
+@validate_ip_for_post_request('home')
+def home(ip):
     boards = get_boards()
-    form = FeedbackForm()
-    if form.validate_on_submit():
-        subject = form.subject.data
-        message = form.message.data
-        ip = PostCompiler.get_ip_from_request(request)
+    feedback = FeedbackForm()
+
+    if feedback.validate_on_submit():
+        subject = feedback.subject.data
+        message = feedback.message.data
         create_feedback(subject, message, ip)
-        msg = 'Thank you for your feedback!'
-        flash(msg)
+        flash(FEEDBACK_MSG)
         return redirect(url_for('home'))
-    return render_template('home.html', boards=boards, form=form, rules=RULES)
+
+    return render_template(
+        'home.html', boards=boards, feedback_form=feedback, rules=RULES
+    )
 
 
 @app.route('/<board_name>')
 @URLSpace.validate_board
 def board_catalog(board_name):
     posts = get_boards_posts(board_name)
-    report_form = ReportForm()
+    report = ReportForm()
     return render_template(
-        'catalog.html', board_name=board_name, posts=posts, report_form=report_form
+        'catalog.html', board_name=board_name, posts=posts, report_form=report
     )
 
 
@@ -108,92 +151,92 @@ def board_post(board_name, post_id):
         abort(404)
 
     replies = get_post_replies(post_id)
-    report_form = ReportForm()
+    report = ReportForm()
     return render_template(
         'post.html',
         board_name=board_name,
         post=post,
         replies=replies,
-        report_form=report_form,
+        report_form=report,
     )
 
 
 @app.route('/<board_name>/post', methods=['POST'])
+@validate_ip_for_post_request('board_catalog')
 @URLSpace.validate_board
-def post_form(board_name):
+def post_form(board_name, ip):
     board_id = get_board_id(board_name)
     p = PostCompiler(request, 'form_text', 'form_img')
-    msg = 'Post submitted.'
+
     if p.valid:
         if upload_image(p.img):
-            create_post(board_id, p.text, p.img, p.user, p.ip)
-        else:
-            msg = 'Trouble uploading image.'
-    else:
-        msg = p.invalid_message
-    flash(msg)
+            create_post(board_id, p.text, p.img, p.user, ip)
+            flash(POST_MSG)
+
     return redirect(url_for('board_catalog', board_name=board_name))
 
 
 @app.route('/<board_name>/<post_id>/reply', methods=['POST'])
+@validate_ip_for_post_request('board_post')
 @URLSpace.validate_board
 @URLSpace.validate_post
-def reply_form(board_name, post_id):
+def reply_form(board_name, post_id, ip):
     p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
-    msg = 'Reply submitted.'
+
     if p.valid:
         upload_image(p.img)
-        create_reply(post_id, p.text, p.img, p.user, p.ip)
-    else:
-        msg = p.invalid_message
-    flash(msg)
+        create_reply(post_id, p.text, p.img, p.user, ip)
+        flash(REPLY_MSG)
+
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
+
+
+@app.route('/<board_name>/<post_id>/<reply_id>/reply', methods=['POST'])
+@validate_ip_for_post_request('board_post')
+@URLSpace.validate_board
+@URLSpace.validate_post
+@URLSpace.validate_reply
+def reply_to_reply(board_name, post_id, reply_id, ip):
+    p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
+
+    if p.valid:
+        upload_image(p.img)
+        create_reply_to_reply(post_id, reply_id, p.text, p.img, p.user, ip)
+        flash(REPLY_MSG)
+
     return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
 @app.route('/<board_name>/<post_id>/report', methods=['POST'])
+@validate_ip_for_post_request('board_catalog')
 @URLSpace.validate_board
 @URLSpace.validate_post
-def report_post(board_name, post_id):
+def report_post(board_name, post_id, ip):
     form = ReportForm()
+
     if form.validate_on_submit():
         category = form.category.data
         message = form.message.data
-        create_report(
-            post_id, None, category, message, PostCompiler.get_ip_from_request(request)
-        )
-        flash('Report Submitted, Thank You.')
+        create_report(post_id, None, category, message, ip)
+        flash(REPORT_MSG)
 
     return redirect(url_for('board_catalog', board_name=board_name))
 
 
 @app.route('/<board_name>/<post_id>/<reply_id>/report', methods=['POST'])
+@validate_ip_for_post_request('board_post')
 @URLSpace.validate_board
 @URLSpace.validate_post
 @URLSpace.validate_reply
-def report_reply(board_name, post_id, reply_id):
-    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False)
-    msg = 'Report Submitted, Thank You.'
-    if p.valid:
-        create_report(post_id, reply_id, 'report_reply', 'report_reply', p.ip)
-    else:
-        msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
-    flash(msg)
-    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
+def report_reply(board_name, post_id, reply_id, ip):
+    form = ReportForm()
 
+    if form.validate_on_submit():
+        category = form.category.data
+        message = form.message.data
+        create_report(post_id, reply_id, category, message, ip)
+        flash(REPORT_MSG)
 
-@app.route('/<board_name>/<post_id>/<reply_id>/reply', methods=['POST'])
-@URLSpace.validate_board
-@URLSpace.validate_post
-@URLSpace.validate_reply
-def reply_to_reply(board_name, post_id, reply_id):
-    p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
-    msg = 'Reply submitted.'
-    if p.valid:
-        upload_image(p.img)
-        create_reply_to_reply(post_id, reply_id, p.text, p.img, p.user, p.ip)
-    else:
-        msg = p.invalid_message if p.invalid_message else 'Could not submit reply.'
-    flash(msg)
     return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 

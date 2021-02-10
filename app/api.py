@@ -1,11 +1,14 @@
 import random
 from datetime import datetime
+from functools import wraps
+from pprint import pprint
 from time import time
-from typing import NamedTuple, List
+from typing import List, NamedTuple
 
+from config import BANNED_MSG, COOLDOWN_MSG, EVENT_COOLDOWN
 from db import get_db, query_db
 from utils import get_file_ext, get_filename_uid_from_img, make_date, make_none
-from pprint import pprint
+
 
 # NamedTuples because dot notation > dictionary syntax for Jinja templates
 class Board(NamedTuple):
@@ -189,6 +192,16 @@ def get_reply_id(reply_id):
     return reply_id
 
 
+def event_wrapper(create_func):
+    @wraps(create_func)
+    def wrapper(*args, **kwargs):
+        push_event(args[-1])
+        return create_func(*args, **kwargs)
+
+    return wrapper
+
+
+@event_wrapper
 def create_post(post_board_id, text, img, user, ip):
     sql_string = """insert into post(post_board_id, user, date, post, img_filename, img_uid, ip)
                         values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?, ?);"""
@@ -199,6 +212,7 @@ def create_post(post_board_id, text, img, user, ip):
     query_db(sql_string, params)
 
 
+@event_wrapper
 def create_reply(post_id, text, img, user, ip):
     sql_string = """insert into reply(reply_post_id, user, date, reply, img_filename, img_uid, ip)
                         values (?, ?, strftime('%Y-%m-%d %H:%M', 'now', 'localtime'), ?, ?, ?, ?);"""
@@ -209,6 +223,7 @@ def create_reply(post_id, text, img, user, ip):
     query_db(sql_string, params)
 
 
+@event_wrapper
 def create_reply_to_reply(post_id, parent_reply_id, text, img, user, ip):
     """
     Replies and replies to replies go in the same SQLite table.
@@ -227,6 +242,7 @@ def create_reply_to_reply(post_id, parent_reply_id, text, img, user, ip):
     query_db(sql_string, params)
 
 
+@event_wrapper
 def create_report(post_id, reply_id, category, message, ip):
     sql_string = """insert into report(post_id, reply_id, category, message, ip)
                     values (?, ?, ?, ?, ?);"""
@@ -235,6 +251,7 @@ def create_report(post_id, reply_id, category, message, ip):
     query_db(sql_string, params)
 
 
+@event_wrapper
 def create_feedback(subject, message, ip):
     sql_string = """insert into feedback(subject, message, ip)
                     values (?, ?, ?);"""
@@ -263,3 +280,16 @@ def push_event(ip, event=None):
     else:
         sql_string = """insert into event(ip) values (?);"""
         query_db(sql_string, [ip], one=True)
+
+
+def is_valid_ip(ip):
+    event = get_event(ip)
+    msg = None
+    if event and event.blacklisted:
+        msg = BANNED_MSG
+
+    elif event and (time() - EVENT_COOLDOWN < event.last_event_date):
+        msg = COOLDOWN_MSG
+
+    result = (True, msg) if msg is None else (False, msg)
+    return result

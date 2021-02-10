@@ -11,31 +11,16 @@ from config import (
     LOG_PATH,
     MAX_FILE_SIZE,
     MAX_POST_LENGTH,
-    MIN_POST_LENGTH,
     MAX_POST_ROWS,
+    MIN_POST_LENGTH,
     REPORTS,
 )
 from flask import current_app, flash
+from flask_wtf import FlaskForm
 from utils import get_new_uid, get_username, make_img_from_request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-
-from flask_wtf import FlaskForm
-from wtforms import Form, StringField, TextAreaField, SelectField, validators
-
-
-def valid_ip(ip):
-    event = get_event(ip)
-    msg = None
-    if event and event.blacklisted:
-        msg = 'IP address banned.'
-
-    elif event and (time() - EVENT_COOLDOWN < event.last_event_date):
-        msg = 'Wait 15 seconds between posts.'
-
-    result = (True, msg) if msg is None else (False, msg)
-    push_event(ip)
-    return result
+from wtforms import Form, SelectField, StringField, TextAreaField, validators
 
 
 class FeedbackForm(FlaskForm):
@@ -53,7 +38,12 @@ class FeedbackForm(FlaskForm):
 
 class ReportForm(FlaskForm):
     category = SelectField('Category', choices=[(r, r) for r in REPORTS])
-    message = TextAreaField('Report', [validators.Length(max=MAX_POST_LENGTH),],)
+    message = TextAreaField(
+        'Report',
+        [
+            validators.Length(max=MAX_POST_LENGTH),
+        ],
+    )
 
 
 class PostCompiler:
@@ -76,7 +66,7 @@ class PostCompiler:
         self.require_img = require_img
         self.validate_text = validate_text
 
-        self.ip = PostCompiler.get_ip_from_request(self.request)
+        self.ip = get_ip_from_request(self.request)
         self.text = request.form.get(form_text_name, None)
         self.img = make_img_from_request(request, form_img_name)
         self.user = get_username()
@@ -85,10 +75,6 @@ class PostCompiler:
         push_event(self.ip, event=self.event)
 
         self.set_is_valid()
-
-    @staticmethod
-    def get_ip_from_request(request):
-        return request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
 
     def is_invalid_text(self):
         text_len = len(re.sub(r'\s', '', self.text))
@@ -103,13 +89,8 @@ class PostCompiler:
 
     def set_is_valid(self):
         assert self.invalid_message == None
-        if self.event and self.event.blacklisted:
-            self.invalid_message = 'IP address banned.'
 
-        elif self.event and (time() - EVENT_COOLDOWN < self.event.last_event_date):
-            self.invalid_message = 'Wait 15 seconds between posts.'
-
-        elif self.require_img:
+        if self.require_img:
             if not self.img:
                 self.invalid_message = 'No image submitted.'
 

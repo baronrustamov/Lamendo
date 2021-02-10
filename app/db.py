@@ -58,4 +58,5 @@ def query_db(query, args=(), one=False):
                 return r[0] if r else None
             return r
         except Exception as e:
+            print(query, args, sep='\n\n\n')
             raise Exception(e) from None

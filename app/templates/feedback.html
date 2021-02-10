@@ -1,10 +1,10 @@
 <h2>Feedback</h2>
 
 <form method="POST" action="{{url_for('home')}}">
-  <div>{{ form.subject.label }}: {{ form.subject(class_="modal_textarea", size="32", maxlength="64") }}</div>
-  <div>{{ form.message.label }}: {{ form.message(class_="modal_textarea", cols="48", rows="8", maxlength="1500") }}</div>
-  {% if form.errors %}
-    {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+  <div>{{ feedback_form.subject.label }}: {{ feedback_form.subject(class_="modal_textarea", size="32", maxlength="64") }}</div>
+  <div>{{ feedback_form.message.label }}: {{ feedback_form.message(class_="modal_textarea", cols="48", rows="8", maxlength="1500") }}</div>
+  {% if feedback_form.errors %}
+    {% for field_name, field_errors in feedback_form.errors|dictsort if field_errors %}
       {% for error in field_errors %}
         <div>{{ form[field_name].label }}: {{ error }}</div>
       {% endfor %}

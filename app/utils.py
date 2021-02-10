@@ -101,3 +101,7 @@ def get_filename_uid_from_img(img):
         filename = make_none(img.filename)
         uid = img.uid
     return filename, uid
+
+
+def get_ip_from_request(request):
+    return request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
