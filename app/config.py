@@ -23,5 +23,16 @@ RULES = (
     'The use of scrapers, bots, or other automated posting or downloading scripts is prohibited.',
     'No posting content using proxies or Tor.',
     'No uploading images containing additional data including: embedded sounds, documents, archives, etc.',
-    'Exceptions to these rules may be granted for testing purposes.'
+    'Exceptions to these rules may be granted for testing purposes.',
 )
+
+
+REPORTS = [
+    'Very low quality or distasteful content.',
+    'Violation of law.',
+    'Personal information is being doxxed.',
+    'Business advertising.',
+    'Spam.',
+    'Something is broken.',
+    'Other.',
+]

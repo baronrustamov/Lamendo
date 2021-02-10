@@ -2,8 +2,16 @@
 <div id="report_modal" class="modal">
   <div id="modal_close_report" class="close">&times;</div>
   <h3>Report</h3>
-  <form id="report_form" action="" method="POST" enctype="multipart/form-data">
-    <textarea class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48" placeholder="Report" autofocus></textarea>
+  <form id="report_form" action="" method="POST">
+    <div>{{ report_form.category.label }}: {{ report_form.category(class_="modal_textarea") }}</div>
+    <div>{{ report_form.message.label }}: {{ report_form.message(class_="modal_textarea", cols="48", rows="8", maxlength="1500") }}</div>
+    {% if report_form.errors %}
+      {% for field_name, field_errors in report_form.errors|dictsort if field_errors %}
+        {% for error in field_errors %}
+          <div>{{ report_form[field_name].label }}: {{ error }}</div>
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
     <div id="feedback_report"></div>
     <input type="submit" value="Submit">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

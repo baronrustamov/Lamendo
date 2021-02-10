@@ -42,7 +42,8 @@ create table report (
     post_id integer,
     reply_id integer,
     date text default (datetime('now')) not null,
-    reason text not null,
+    category text not null,
+    message text,
     ip text not null
 );
 

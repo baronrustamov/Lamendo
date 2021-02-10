@@ -18,7 +18,7 @@ from api import (
 from config import IMG_PATH, LOG_PATH, MAX_FILE_SIZE, RULES
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFProtect
-from forms import PostCompiler, FeedbackForm
+from forms import PostCompiler, FeedbackForm, ReportForm
 from urls import URLSpace
 from utils import upload_image
 
@@ -94,7 +94,10 @@ def home():
 @URLSpace.validate_board
 def board_catalog(board_name):
     posts = get_boards_posts(board_name)
-    return render_template('catalog.html', board_name=board_name, posts=posts)
+    report_form = ReportForm()
+    return render_template(
+        'catalog.html', board_name=board_name, posts=posts, report_form=report_form
+    )
 
 
 @app.route('/<board_name>/<post_id>')
@@ -105,9 +108,13 @@ def board_post(board_name, post_id):
         abort(404)
 
     replies = get_post_replies(post_id)
-
+    report_form = ReportForm()
     return render_template(
-        'post.html', board_name=board_name, post=post, replies=replies
+        'post.html',
+        board_name=board_name,
+        post=post,
+        replies=replies,
+        report_form=report_form,
     )
 
 
@@ -147,13 +154,15 @@ def reply_form(board_name, post_id):
 @URLSpace.validate_board
 @URLSpace.validate_post
 def report_post(board_name, post_id):
-    p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False)
-    msg = 'Report submitted.'
-    if p.valid:
-        create_report(post_id, None, p.text, p.ip)
-    else:
-        msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
-    flash(msg)
+    form = ReportForm()
+    if form.validate_on_submit():
+        category = form.category.data
+        message = form.message.data
+        create_report(
+            post_id, None, category, message, PostCompiler.get_ip_from_request(request)
+        )
+        flash('Report Submitted, Thank You.')
+
     return redirect(url_for('board_catalog', board_name=board_name))
 
 
@@ -163,9 +172,9 @@ def report_post(board_name, post_id):
 @URLSpace.validate_reply
 def report_reply(board_name, post_id, reply_id):
     p = PostCompiler(request, 'form_text', None, require_text=False, require_img=False)
-    msg = 'Report submitted.'
+    msg = 'Report Submitted, Thank You.'
     if p.valid:
-        create_report(post_id, reply_id, p.text, p.ip)
+        create_report(post_id, reply_id, 'report_reply', 'report_reply', p.ip)
     else:
         msg = p.invalid_message if p.invalid_message else 'Could not submit report.'
     flash(msg)

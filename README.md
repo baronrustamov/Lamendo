@@ -1,7 +1,6 @@
 <div style="text-align:center">
-    <img src="resources/lamendo.png" alt="Lamendo" width="500"/>
+    <img src="app/static/lamendo.png" alt="Lamendo" width="500"/>
 </div>
-
 <br>
 <br>
 

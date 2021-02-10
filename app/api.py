@@ -227,11 +227,11 @@ def create_reply_to_reply(post_id, parent_reply_id, text, img, user, ip):
     query_db(sql_string, params)
 
 
-def create_report(post_id, reply_id, text, ip):
-    sql_string = """insert into report(post_id, reply_id, reason, ip)
-                    values (?, ?, ?, ?);"""
-    text = make_none(text)
-    params = [post_id, reply_id, text, ip]
+def create_report(post_id, reply_id, category, message, ip):
+    sql_string = """insert into report(post_id, reply_id, category, message, ip)
+                    values (?, ?, ?, ?, ?);"""
+    message = make_none(message)
+    params = [post_id, reply_id, category, message, ip]
     query_db(sql_string, params)
 
 

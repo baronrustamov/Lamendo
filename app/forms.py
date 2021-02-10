@@ -13,14 +13,29 @@ from config import (
     MAX_POST_LENGTH,
     MIN_POST_LENGTH,
     MAX_POST_ROWS,
+    REPORTS,
 )
-from flask import current_app
+from flask import current_app, flash
 from utils import get_new_uid, get_username, make_img_from_request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from flask_wtf import FlaskForm
-from wtforms import Form, StringField, TextAreaField, validators
+from wtforms import Form, StringField, TextAreaField, SelectField, validators
+
+
+def valid_ip(ip):
+    event = get_event(ip)
+    msg = None
+    if event and event.blacklisted:
+        msg = 'IP address banned.'
+
+    elif event and (time() - EVENT_COOLDOWN < event.last_event_date):
+        msg = 'Wait 15 seconds between posts.'
+
+    result = (True, msg) if msg is None else (False, msg)
+    push_event(ip)
+    return result
 
 
 class FeedbackForm(FlaskForm):
@@ -34,6 +49,11 @@ class FeedbackForm(FlaskForm):
             validators.InputRequired(),
         ],
     )
+
+
+class ReportForm(FlaskForm):
+    category = SelectField('Category', choices=[(r, r) for r in REPORTS])
+    message = TextAreaField('Report', [validators.Length(max=MAX_POST_LENGTH),],)
 
 
 class PostCompiler:

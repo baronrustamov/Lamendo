@@ -43,11 +43,11 @@ insert into event(ip, last_event_date, blacklisted)
 
 
 
-insert into report(post_id, reply_id, date, reason, ip)
-    values (1, 1, null, strftime('%Y-%m-%d %H:%M', 'now'), 'Bad post.', '1.2.3.4');
+insert into report(post_id, reply_id, date, category, message, ip)
+    values (1, 1, null, strftime('%Y-%m-%d %H:%M', 'now'), 'Bad post category.', 'Bad post message.', '1.2.3.4');
 
-insert into report(post_id, reply_id, date, reason, ip)
-    values (null, 1, strftime('%Y-%m-%d %H:%M', 'now'), 'Bad reply.', '1.2.3.4');
+insert into report(post_id, reply_id, date, category, message, ip)
+    values (null, 1, strftime('%Y-%m-%d %H:%M', 'now'), 'Bad reply category.', 'Bad reply message.', '1.2.3.4');
 
 
 

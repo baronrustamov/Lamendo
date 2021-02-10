@@ -13,6 +13,18 @@
 {% endmacro %}
 
 
+{% macro post_metadata(post) %}
+  <div class="metadata">
+    {{ post.date }}
+  </div>
+  {% if post.img_filename %}
+    <div class="metadata">
+      {{post.img_filename}}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+
 {% macro data(record, type) %}
   <div class="img_and_caption">
     {% if record.img_filename %}

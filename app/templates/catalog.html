@@ -2,50 +2,52 @@
 {% import 'macros.html' as macros %}
 
 {% block body %}
+{% include 'report_modal.html' %}
 
 <h2 class="title">{{board_name}}</h2>
-<div>
-  <h3>Create Post</h3>
-  <form id="post_form" method="POST" action="/{{board_name}}/post" enctype="multipart/form-data">
-    <textarea id="form_text" class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48"></textarea>
-    <input id="form_img_post" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
-    <div id="feedback_post"></div>
-    <input id="post_submit" type="submit" value="Post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-  </form>
+<div class="center">
+  <div class="reply">
+    <h3>Create Post</h3>
+    <form id="post_form" method="POST" action="/{{board_name}}/post" enctype="multipart/form-data">
+      <textarea id="form_text" class="modal_textarea" maxlength="1500" type="text" name="form_text" rows="8" cols="48"></textarea>
+      <input id="form_img_post" type="file" value="Choose File" name="form_img" accept="image/jpg,image/png,image/jpeg,image/gif">
+      <div id="feedback_post"></div>
+      <input id="post_submit" type="submit" value="Post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    </form>
+  </div>
 </div>
 
-<div>
-  {% if posts %}
-    <h3>Posts</h3>
-    <div class="container">
-      {% for post in posts %}
-      <div class="post">
+{% if posts %}
+  <div class="container">
+    {% for post in posts %}
+    <div class="post">
+      
+      <div class="metadata">
+        <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/report">>></button>
+      </div>
+
+      <a href="{{ url_for('board_post', board_name=board_name, post_id=post.post_id) }}">
         
-        <div class="metadata">
-          <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/report">>></button>
+        {{ macros.post_metadata(post) }}
+
+        <div class="post_img_and_caption">
+          {% if post.img_filename %}
+            <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
+          {% endif %}
+
+          {% if post %}
+            <div class="formatted_text padding4">{{ post.post }}</div>
+          {% endif %}
         </div>
 
-        <a href="{{ url_for('board_post', board_name=board_name, post_id=post.post_id) }}">
-          
-          {{ macros.metadata(post) }}
+      </a>
 
-          <div class="post_img_and_caption">
-            {% if post.img_filename %}
-              <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
-            {% endif %}
-
-            {% if post %}
-              <div class="formatted_text padding4">{{ post.post }}</div>
-            {% endif %}
-          </div>
-
-        </a>
-
-      </div>
-      {% endfor %}
     </div>
-  {% endif %}
-</div>
+    {% endfor %}
+  </div>
+{% else %}
+  <h4 class="center">*No Posts*</h4>
+{% endif %}
 
 {% endblock %}
