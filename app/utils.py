@@ -15,6 +15,7 @@ from config import (
 from flask import current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
+import uuid
 
 
 def make_none(*args):
@@ -33,8 +34,8 @@ def make_none(*args):
 
 
 def get_new_uid():
-    # e.g. 0x385a482f97b356[2:]
-    uid = hex(int(time() * 10_000_000))[2:]
+    # c268d6, 12215b, 96e2c6, etc.
+    uid = uuid.uuid4().hex[:6]
     return uid
 
 

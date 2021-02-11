@@ -3,7 +3,18 @@ __pycache__/
 *.db
 
 app/static/img_uploads/
-!1a2b3c4d5e.png
+!90210.jpg
+!all_of_us,_together.jpg
+!brandon.png
+!buk.jpg
+!dhalgren.jpg
+!dine_time.jpg
+!fallen_angles_1995.jpg
+!glacier.jpg
+!neptune.jpg
+!oo.gif
+!stacko.png
+!three_gorges.jpg
 
 *.log
 

@@ -1,8 +1,10 @@
 <h2>Boards</h2>
-{% for board in boards %}
-  <div class="wrapper inline">
-      <a href="/{{board.board_name}}">
-        {{board.board_name}}
-      </a>
-  </div>
-{% endfor %}
+{% if boards %}
+  {% for board in boards %}
+    <div class="wrapper inline">
+        <a href="/{{board.board_name}}">
+          {{board.board_name}}
+        </a>
+    </div>
+  {% endfor %}
+{% endif %}

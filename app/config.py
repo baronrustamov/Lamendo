@@ -1,3 +1,5 @@
+PRODUCTION = False
+
 DATABASE = 'db/lamendo.db'
 SCHEMA = 'db/schema.sql'
 INIT_DATA = 'db/data.sql'

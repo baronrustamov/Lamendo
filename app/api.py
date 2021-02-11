@@ -5,7 +5,7 @@ from pprint import pprint
 from time import time
 from typing import List, NamedTuple
 
-from config import BANNED_MSG, COOLDOWN_MSG, EVENT_COOLDOWN
+from config import BANNED_MSG, COOLDOWN_MSG, EVENT_COOLDOWN, PRODUCTION
 from db import get_db, query_db
 from utils import get_file_ext, get_filename_uid_from_img, make_date, make_none
 
@@ -105,13 +105,13 @@ def make_replies(rows):
     return replies
 
 
-def get_board_acronyms():
+def get_board_names():
     sql_string = """
         select board_name
         from board;
     """
     rows = query_db(sql_string)
-    return set(row['board_name'] for row in rows)
+    return set(row['board_name'] for row in rows) if rows else None
 
 
 def get_post(post_id):
@@ -195,10 +195,19 @@ def get_reply_id(reply_id):
 def event_wrapper(create_func):
     @wraps(create_func)
     def wrapper(*args, **kwargs):
-        push_event(args[-1])
+        if PRODUCTION:
+            push_event(args[-1])
         return create_func(*args, **kwargs)
 
     return wrapper
+
+
+@event_wrapper
+def create_board(board_name, board_description, ip):
+    sql_string = """insert into board(board_name, board_description)
+                                values (?, ?);"""
+    params = [board_name, board_description]
+    query_db(sql_string, params)
 
 
 @event_wrapper

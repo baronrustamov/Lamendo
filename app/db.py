@@ -2,20 +2,20 @@ import inspect
 import os
 import sqlite3
 
-from config import DATABASE, INIT_DATA, SCHEMA
+from config import DATABASE, SCHEMA
 from flask import current_app, g
+from data import init_db_data
 
 
-def init_db():
+def init_db_schema():
     """https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/#initial-schemas"""
     with current_app.app_context():
         db = get_db()
-        inits = [SCHEMA, INIT_DATA]
-        for init in inits:
-            with current_app.open_resource(init, mode='r') as f:
-                sql_string = f.read()
-                db.cursor().executescript(sql_string)
-            db.commit()
+        with current_app.open_resource(SCHEMA, mode='r') as f:
+            sql_string = f.read()
+            db.cursor().executescript(sql_string)
+        db.commit()
+        init_db_data()
 
 
 def is_db_initialized():
@@ -34,8 +34,7 @@ def get_db():
             g.database = sqlite3.connect(DATABASE)
 
             if not db_initialized:
-                init_db()
-
+                init_db_schema()
             db = g.database
         # Make using dictionary sytanx available with:
         db.row_factory = sqlite3.Row

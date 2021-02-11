@@ -1,15 +1,15 @@
 from functools import wraps
 
-from api import get_board_acronyms, get_post_id, get_reply_id
+from api import get_board_names, get_post_id, get_reply_id
 from flask import abort, current_app
 
 
 class URLSpace:
     def __init__(self):
-        self.board_acronyms = get_board_acronyms()
+        self.board_names = get_board_names()
 
-    def valid_board_acronym(self, val):
-        return val in self.board_acronyms
+    def valid_board_name(self, val):
+        return val in self.board_names
 
     @staticmethod
     def validate_board(fn):
@@ -17,7 +17,7 @@ class URLSpace:
         def wrapper(*args, **kwargs):
             board_name = kwargs['board_name']
             with current_app.app_context():
-                if not current_app.url_space.valid_board_acronym(board_name):
+                if not current_app.url_space.valid_board_name(board_name):
                     abort(404)
             return fn(*args, **kwargs)
 
