@@ -4,7 +4,7 @@
 {% block body %}
 {% include 'report_modal.html' %}
 
-<h3>Post</h3>
+<div class="big_font bottom_padding">Post</div>
 <div class="reply">
   <div class="metadata">
     <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/report">>></button>
@@ -17,7 +17,7 @@
 </div>
 
 {% if replies %}
-  <h3>Replies</h3>
+  <div class="big_font bottom_padding">Replies</div>
   {% for reply in replies %}
   <div class="reply">
     <div id="c{{reply.user}}">
@@ -89,9 +89,9 @@
           $(link_target).bind('mouseenter', jump_link_hover_on);
           $(link_target).bind('mouseleave', jump_link_hover_off);
         }
-        else if(link_type=="parent_link"){
-          $(link_target).bind('mouseenter', parent_link_hover_on);
-          $(link_target).bind('mouseleave', parent_link_hover_off);
+        else if(link_type=="nav_link_color"){
+          $(link_target).bind('mouseenter', nav_link_color_hover_on);
+          $(link_target).bind('mouseleave', nav_link_color_hover_off);
         }
       }, 1000);
     }
@@ -121,22 +121,22 @@
 
 
 
-    function parent_link_hover_on() {
-      let link_type = "parent_link";
+    function nav_link_color_hover_on() {
+      let link_type = "nav_link_color";
       let sibling_class_target = ".preview";
       hover_init(link_type, this, sibling_class_target);
     }
 
-    function parent_link_hover_off() {
-      let link_type = "parent_link";
+    function nav_link_color_hover_off() {
+      let link_type = "nav_link_color";
       let sibling_class_target = ".preview";
       hover_del(link_type, this, sibling_class_target);
     }
 
-    $('a[parent_link]').hover(parent_link_hover_on, parent_link_hover_off);
-    $('a[parent_link]').click(function() {
-      let link_target = 'a[parent_link]';
-      let link_type = 'parent_link';
+    $('a[nav_link_color]').hover(nav_link_color_hover_on, nav_link_color_hover_off);
+    $('a[nav_link_color]').click(function() {
+      let link_target = 'a[nav_link_color]';
+      let link_type = 'nav_link_color';
       let sibling_class_target = '.preview';
 
       goToPreview(link_target, link_type, this, sibling_class_target);

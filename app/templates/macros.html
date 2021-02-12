@@ -38,7 +38,7 @@
     {% if type == "reply" %}
       <div>
         {% if record.parent_reply_id and record.parent_user[0] %}
-          <a href="#p{{record.parent_reply_id}}" parent_link="p{{record.parent_reply_id}}" class="parent_link">{{ record.parent_user[0] }}</a>
+          <a href="#p{{record.parent_reply_id}}" nav_link_color="p{{record.parent_reply_id}}" class="nav_link_color underline">{{ record.parent_user[0] }}</a>
           <div class="preview"></div>
         {% endif %}
         <div class="formatted_text">{{ record.reply }}</div>

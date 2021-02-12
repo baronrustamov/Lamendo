@@ -1,0 +1,7 @@
+{% if boards %}
+  {% for board in boards %}
+    <div class="inline padding10">
+        [<a href="/{{board.board_name}}" class="nav_link_color">{{board.board_name}}</a>]
+    </div>
+  {% endfor %}
+{% endif %}

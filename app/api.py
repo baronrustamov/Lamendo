@@ -26,6 +26,8 @@ class Post(NamedTuple):
     img_uid: str
     img_ext: str
     date: datetime
+    post_board_name: str
+    reply_count: int
 
 
 class Reply(NamedTuple):
@@ -73,6 +75,8 @@ def make_post(row):
             row['img_uid'],
             get_file_ext(row['img_filename']),
             make_date(row['date']),
+            row['post_board_name'],
+            row['reply_count']
         )
         return p
     return None
@@ -116,12 +120,42 @@ def get_board_names():
 
 def get_post(post_id):
     sql_string = """
-        select post.*
-        from post
-        where post.post_id = ?;
+        select
+            post.*,
+            board.board_name post_board_name,
+            count(*) reply_count
+        from
+            post
+            left join reply on reply.reply_post_id = post.post_id
+            left join board on board.board_id = post.post_board_id
+        where post.post_id = ?
+        group by
+            post_id;
     """
     row = query_db(sql_string, args=[post_id], one=True)
     return make_post(row)
+
+
+def get_popular_posts(n=4):
+    sql_string = """
+        select
+            reply_post_id,
+            count(*) reply_count
+        from
+            reply
+        group by
+            reply_post_id
+        order by reply_count desc
+        limit ?;
+    """
+    rows = query_db(sql_string, args=[n])
+    if not rows:
+        return None
+
+    posts = []
+    for r in rows:
+        posts.append(get_post(r['reply_post_id']))
+    return posts
 
 
 def get_post_replies(post_id):
@@ -153,11 +187,17 @@ def get_post_replies(post_id):
 
 def get_boards_posts(board_name):
     sql_string = """
-        select post.*
+        select
+            post.*,
+            board_name post_board_name,
+            count(*) reply_count
         from board
             left join post on board.board_id = post.post_board_id
+            left join reply on reply.reply_post_id = post.post_id
         where board_name = ?
-        and post.post_id is not null
+            and post.post_id is not null
+        group by
+            post_id
         order by post_id;
     """
     rows = query_db(sql_string, args=[board_name])
@@ -166,8 +206,8 @@ def get_boards_posts(board_name):
 
 def get_boards():
     sql_string = 'select * from board;'
-    row = query_db(sql_string)
-    boards = ([Board(*board) for board in row]) if row else None
+    rows = query_db(sql_string)
+    boards = ([Board(*board) for board in rows]) if rows else None
     return boards
 
 

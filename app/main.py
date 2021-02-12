@@ -14,6 +14,7 @@ from api import (
     get_boards,
     get_boards_posts,
     get_post,
+    get_popular_posts,
     get_post_replies,
     is_valid_ip,
 )
@@ -119,6 +120,7 @@ def validate_ip_for_post_request(redirect_to):
 @validate_ip_for_post_request('home')
 def home(ip):
     boards = get_boards()
+    posts = get_popular_posts()
     feedback = FeedbackForm()
 
     if feedback.validate_on_submit():
@@ -129,23 +131,23 @@ def home(ip):
         return redirect(url_for('home'))
 
     return render_template(
-        'home.html', boards=boards, feedback_form=feedback, rules=RULES
+        'home.html', boards=boards, posts=posts, feedback_form=feedback, rules=RULES
     )
 
 
 @app.route('/<board_name>')
 @URLSpace.validate_board
-def board_catalog(board_name):
+def board_catalog(board_name, boards):
     posts = get_boards_posts(board_name)
     report = ReportForm()
     return render_template(
-        'catalog.html', board_name=board_name, posts=posts, report_form=report
+        'catalog.html', board_name=board_name, boards=boards, posts=posts, report_form=report
     )
 
 
 @app.route('/<board_name>/<post_id>')
 @URLSpace.validate_board
-def board_post(board_name, post_id):
+def board_post(board_name, post_id, boards):
     post = get_post(post_id)
     if not post:
         abort(404)
@@ -155,6 +157,7 @@ def board_post(board_name, post_id):
     return render_template(
         'post.html',
         board_name=board_name,
+        boards=boards,
         post=post,
         replies=replies,
         report_form=report,
@@ -164,7 +167,7 @@ def board_post(board_name, post_id):
 @app.route('/<board_name>/post', methods=['POST'])
 @validate_ip_for_post_request('board_catalog')
 @URLSpace.validate_board
-def post_form(board_name, ip):
+def post_form(board_name, boards, ip):
     board_id = get_board_id(board_name)
     p = PostCompiler(request, 'form_text', 'form_img')
 
@@ -173,14 +176,14 @@ def post_form(board_name, ip):
             create_post(board_id, p.text, p.img, p.user, ip)
             flash(POST_MSG)
 
-    return redirect(url_for('board_catalog', board_name=board_name))
+    return redirect(url_for('board_catalog', board_name=board_name, boards=boards))
 
 
 @app.route('/<board_name>/<post_id>/reply', methods=['POST'])
 @validate_ip_for_post_request('board_post')
 @URLSpace.validate_board
 @URLSpace.validate_post
-def reply_form(board_name, post_id, ip):
+def reply_form(board_name, boards, post_id, ip):
     p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
 
     if p.valid:
@@ -188,7 +191,7 @@ def reply_form(board_name, post_id, ip):
         create_reply(post_id, p.text, p.img, p.user, ip)
         flash(REPLY_MSG)
 
-    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
+    return redirect(url_for('board_post', board_name=board_name, boards=boards, post_id=post_id))
 
 
 @app.route('/<board_name>/<post_id>/<reply_id>/reply', methods=['POST'])
@@ -196,7 +199,7 @@ def reply_form(board_name, post_id, ip):
 @URLSpace.validate_board
 @URLSpace.validate_post
 @URLSpace.validate_reply
-def reply_to_reply(board_name, post_id, reply_id, ip):
+def reply_to_reply(board_name, boards, post_id, reply_id, ip):
     p = PostCompiler(request, 'form_text', 'form_img', require_img=False)
 
     if p.valid:
@@ -204,14 +207,14 @@ def reply_to_reply(board_name, post_id, reply_id, ip):
         create_reply_to_reply(post_id, reply_id, p.text, p.img, p.user, ip)
         flash(REPLY_MSG)
 
-    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
+    return redirect(url_for('board_post', board_name=board_name, boards=boards, post_id=post_id))
 
 
 @app.route('/<board_name>/<post_id>/report', methods=['POST'])
 @validate_ip_for_post_request('board_catalog')
 @URLSpace.validate_board
 @URLSpace.validate_post
-def report_post(board_name, post_id, ip):
+def report_post(board_name, boards, post_id, ip):
     form = ReportForm()
 
     if form.validate_on_submit():
@@ -220,7 +223,7 @@ def report_post(board_name, post_id, ip):
         create_report(post_id, None, category, message, ip)
         flash(REPORT_MSG)
 
-    return redirect(url_for('board_catalog', board_name=board_name))
+    return redirect(url_for('board_catalog', board_name=board_name, boards=boards))
 
 
 @app.route('/<board_name>/<post_id>/<reply_id>/report', methods=['POST'])
@@ -228,7 +231,7 @@ def report_post(board_name, post_id, ip):
 @URLSpace.validate_board
 @URLSpace.validate_post
 @URLSpace.validate_reply
-def report_reply(board_name, post_id, reply_id, ip):
+def report_reply(board_name, boards, post_id, reply_id, ip):
     form = ReportForm()
 
     if form.validate_on_submit():
@@ -237,7 +240,7 @@ def report_reply(board_name, post_id, reply_id, ip):
         create_report(post_id, reply_id, category, message, ip)
         flash(REPORT_MSG)
 
-    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
+    return redirect(url_for('board_post', board_name=board_name, boards=boards, post_id=post_id))
 
 
 if __name__ == '__main__':

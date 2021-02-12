@@ -36,7 +36,7 @@ def init_db_data():
         },
         {
             name: 'Technology',
-            desc: 'For anything and everything relating to techonology. Images should relate to your post.',
+            desc: 'For anything and everything relating to technology. Images should relate to your post.',
         },
         {name: 'Art', desc: 'Sharing and discussion of visual artwork, photography included.'},
         {

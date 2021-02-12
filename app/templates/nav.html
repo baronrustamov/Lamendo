@@ -1,15 +1,15 @@
+<div class="center">
+  {% include 'nav_boards.html' %}
+</div>
 <div class="nav">
-  <div class="top_padding">
+  <div class="top_padding bottom_padding">
     <a href="{{url_for('home')}}">
       <img src="{{url_for('static', filename='lamendo.png')}}" alt="Lamendo"/>
     </a>
   </div>
-  
   {% if request.path != url_for('home') %}
     {% if post %}
-    <a href="{{url_for('board_catalog', board_name=board_name)}}"><h4>{{board_name}}'s Catalog</h4></a>
-    {% else %}
-    <div></div>
+    <a href="{{url_for('board_catalog', board_name=board_name)}}" class="big_font">{{board_name}} Catalog</a>
     {% endif %}
   {% endif %}
 </div>
