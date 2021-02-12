@@ -1,12 +1,13 @@
 from functools import wraps
 
-from api import get_board_names, get_post_id, get_reply_id
+from api import get_boards, get_post_id, get_reply_id
 from flask import abort, current_app
 
 
 class URLSpace:
     def __init__(self):
-        self.board_names = get_board_names()
+        self.boards = get_boards()
+        self.board_names = [b.board_name for b in self.boards] if self.boards else None
 
     def valid_board_name(self, val):
         return val in self.board_names
@@ -17,6 +18,7 @@ class URLSpace:
         def wrapper(*args, **kwargs):
             board_name = kwargs['board_name']
             with current_app.app_context():
+                kwargs['boards'] = current_app.url_space.boards
                 if not current_app.url_space.valid_board_name(board_name):
                     abort(404)
             return fn(*args, **kwargs)

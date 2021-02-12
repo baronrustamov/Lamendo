@@ -16,7 +16,7 @@ def init_db_data():
     desc = 'desc'
 
     board_id = 'board_id'
-    post_id = 'post_id',
+    post_id = ('post_id',)
     reply_id = 'reply_id'
     parent_reply_id = 'parent_reply_id'
     text = 'text'
@@ -28,7 +28,7 @@ def init_db_data():
     uid = 'uid'
 
     home = '127.0.0.1'
-    
+
     boards = [
         {
             name: 'Music',
@@ -36,9 +36,12 @@ def init_db_data():
         },
         {
             name: 'Technology',
-            desc: 'For anything and everything relating to techonology. Images should relate to your post.',
+            desc: 'For anything and everything relating to technology. Images should relate to your post.',
         },
-        {name: 'Art', desc: 'Sharing and discussion of visual artwork, photography included.'},
+        {
+            name: 'Art',
+            desc: 'Sharing and discussion of visual artwork, photography included.',
+        },
         {
             name: 'Film',
             desc: 'Discussion of movies and t.v. shows. Images should relate to your post.',
@@ -210,22 +213,21 @@ https://www.youtube.com/watch?v=FXii0aY0-zI""",
     for p in posts:
         api.create_post(p[board_id], p[text], p[img], p[user], p[ip])
 
-
     replies = [
         {
             post_id: 1,
             text: """I have come to to wound the autumnal city. (Dhalgren 1975)""",
             img: None,
             user: get_new_uid(),
-            ip: home
+            ip: home,
         },
         {
             post_id: 9,
             text: """.""",
             img: create_img_obj('oo.gif'),
             user: get_new_uid(),
-            ip: home
-        }
+            ip: home,
+        },
     ]
 
     for r in replies:
@@ -238,7 +240,7 @@ https://www.youtube.com/watch?v=FXii0aY0-zI""",
             text: """The main character of that book, like the author, is possibly intermittently schizophrenic. The novel's narrative is intermittently incoherent (particularly at its end), the protagonist has memories of a stay in a mental hospital, and his perception of reality and the passages of time sometimes differ from those of other characters. Over the course of the story he also suffers from significant memory loss. In addition, he is dyslexic, confusing left and right and often taking wrong turns at street corners and getting lost in the city. It is therefore unclear to what extent the events in the story are the product of an unreliable narrator.""",
             img: create_img_obj('dhalgren.jpg'),
             user: get_new_uid(),
-            ip: home
+            ip: home,
         },
         {
             post_id: 1,
@@ -246,9 +248,11 @@ https://www.youtube.com/watch?v=FXii0aY0-zI""",
             text: """That explains a lot""",
             img: create_img_obj('oo.gif'),
             user: get_new_uid(),
-            ip: home
-        }
+            ip: home,
+        },
     ]
 
     for rr in reply_to_reply:
-        api.create_reply_to_reply(rr[post_id], rr[parent_reply_id], rr[text], rr[img], rr[user], rr[ip])
+        api.create_reply_to_reply(
+            rr[post_id], rr[parent_reply_id], rr[text], rr[img], rr[user], rr[ip]
+        )

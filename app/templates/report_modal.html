@@ -1,9 +1,11 @@
 
 <div id="report_modal" class="modal">
   <div id="modal_close_report" class="close">&times;</div>
-  <h3>Report</h3>
+  <div class="big_font bottom_padding">Report</div>
+  <br>
   <form id="report_form" action="" method="POST">
     <div>{{ report_form.category.label }}: {{ report_form.category(class_="modal_textarea") }}</div>
+    <br>
     <div>{{ report_form.message.label }}: {{ report_form.message(class_="modal_textarea", cols="48", rows="8", maxlength="1500") }}</div>
     {% if report_form.errors %}
       {% for field_name, field_errors in report_form.errors|dictsort if field_errors %}

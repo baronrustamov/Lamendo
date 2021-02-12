@@ -23,6 +23,7 @@ from werkzeug.utils import secure_filename
 from wtforms import Form, SelectField, StringField, TextAreaField, validators
 from utils import get_ip_from_request
 
+
 class FeedbackForm(FlaskForm):
     subject = StringField(
         'Subject', [validators.Length(min=1, max=64), validators.InputRequired()]

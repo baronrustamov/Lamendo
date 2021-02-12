@@ -1,0 +1,12 @@
+<h2>Boards</h2>
+{% if boards %}
+  {% for board in boards %}
+    <div>
+      <div class="inline big_font">
+          [ <a href="/{{board.board_name}}" class="nav_link_color">{{board.board_name}}</a> ]
+      </div>
+      {{board.board_description}}
+    </div>
+    <br>
+  {% endfor %}
+{% endif %}
