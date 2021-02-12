@@ -141,7 +141,11 @@ def board_catalog(board_name, boards):
     posts = get_boards_posts(board_name)
     report = ReportForm()
     return render_template(
-        'catalog.html', board_name=board_name, boards=boards, posts=posts, report_form=report
+        'catalog.html',
+        board_name=board_name,
+        boards=boards,
+        posts=posts,
+        report_form=report,
     )
 
 
@@ -191,7 +195,9 @@ def reply_form(board_name, boards, post_id, ip):
         create_reply(post_id, p.text, p.img, p.user, ip)
         flash(REPLY_MSG)
 
-    return redirect(url_for('board_post', board_name=board_name, boards=boards, post_id=post_id))
+    return redirect(
+        url_for('board_post', board_name=board_name, boards=boards, post_id=post_id)
+    )
 
 
 @app.route('/<board_name>/<post_id>/<reply_id>/reply', methods=['POST'])
@@ -207,7 +213,9 @@ def reply_to_reply(board_name, boards, post_id, reply_id, ip):
         create_reply_to_reply(post_id, reply_id, p.text, p.img, p.user, ip)
         flash(REPLY_MSG)
 
-    return redirect(url_for('board_post', board_name=board_name, boards=boards, post_id=post_id))
+    return redirect(
+        url_for('board_post', board_name=board_name, boards=boards, post_id=post_id)
+    )
 
 
 @app.route('/<board_name>/<post_id>/report', methods=['POST'])
@@ -240,7 +248,9 @@ def report_reply(board_name, boards, post_id, reply_id, ip):
         create_report(post_id, reply_id, category, message, ip)
         flash(REPORT_MSG)
 
-    return redirect(url_for('board_post', board_name=board_name, boards=boards, post_id=post_id))
+    return redirect(
+        url_for('board_post', board_name=board_name, boards=boards, post_id=post_id)
+    )
 
 
 if __name__ == '__main__':
