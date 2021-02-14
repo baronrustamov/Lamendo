@@ -6,14 +6,16 @@
 
 ## Overview
 
-Lamendo is an online bulletin board system (BBS) made using Flask and SQLite. There are some outdated examples of what it looks like in the resources folder. I plan on deploying this online by the end of February 2021. More coming soon!
+Lamendo is an online bulletin board system (BBS) made using Flask and SQLite.
+
+Check out an instance I host at [https://www.lamendo.xyz/](https://www.lamendo.xyz/).
 <br>
 <br>
 
 
 ## Getting Started
 
-`pip install requirements.txt`
+`pip install -r requirements.txt`
 
 `cd app`
 
