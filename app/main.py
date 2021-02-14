@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 import pytz
@@ -17,6 +17,10 @@ from api import (
     get_popular_posts,
     get_post_replies,
     is_valid_ip,
+    get_posts,
+    get_replies,
+    get_feedbacks,
+    get_reports,
 )
 from config import (
     FEEDBACK_MSG,
@@ -28,7 +32,7 @@ from config import (
     REPORT_MSG,
     RULES,
 )
-from flask import Flask, abort, flash, redirect, render_template, request, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, url_for, session
 from flask_wtf.csrf import CSRFProtect
 from forms import FeedbackForm, PostCompiler, ReportForm
 from urls import URLSpace
@@ -55,9 +59,6 @@ logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 csrf = CSRFProtect(app)
 
-eastern = pytz.timezone('US/Eastern')
-
-
 # @app.errorhandler(Exception)
 # def all_exception_handler(error):
 #    return 'Internal Server Error', 500
@@ -67,9 +68,9 @@ eastern = pytz.timezone('US/Eastern')
 def after_request(response):
     env = request.environ
     attrs = [
-        'REQUEST_URI',
         'REQUEST_METHOD',
         'REMOTE_ADDR',
+        'REQUEST_URI',
         'REMOTE_PORT',
         'CONTENT_LENGTH',
         'HTTP_X_FORWARDED_FOR',
@@ -77,8 +78,8 @@ def after_request(response):
     ]
     not_found = 'unknown'
     l = [f'{attr}: {env.get(attr, not_found)}' for attr in attrs]
-    l.insert(0, eastern.fromutc(datetime.utcnow()).strftime('%c'))
-    logging.info(', '.join(l))
+    l.insert(0, datetime.utcnow().strftime('%c'))
+    logging.info('~ '.join(l))
     return response
 
 
@@ -108,7 +109,12 @@ def validate_ip_for_post_request(redirect_to):
                 ip_status, msg = is_valid_ip(ip)
                 if not ip_status:
                     flash(msg)
-                    return redirect(url_for(redirect_to, **kwargs))
+                    d = {}
+                    if 'board_name' in kwargs:
+                        d['board_name'] = kwargs['board_name']
+                    if 'post_id' in kwargs and redirect_to != 'board_catalog':
+                        d['post_id'] = kwargs['post_id']
+                    return redirect(url_for(redirect_to, **d))
             return func(*args, **kwargs)
 
         return wrapper
@@ -132,6 +138,25 @@ def home(ip):
 
     return render_template(
         'home.html', boards=boards, posts=posts, feedback_form=feedback, rules=RULES
+    )
+
+
+@app.route('/moderate')
+@validate_ip_for_post_request('moderate')
+def moderate(ip):
+    days = 2
+    since = timedelta(days=days)
+
+    posts = get_posts(since=since)
+    replies = get_replies(since=since)
+    reports = get_reports(since=since)
+    feedbacks = get_feedbacks(since=since)
+    return render_template(
+        'moderate.html',
+        posts=posts,
+        replies=replies,
+        reports=reports,
+        feedbacks=feedbacks,
     )
 
 
@@ -180,7 +205,7 @@ def post_form(board_name, boards, ip):
             create_post(board_id, p.text, p.img, p.user, ip)
             flash(POST_MSG)
 
-    return redirect(url_for('board_catalog', board_name=board_name, boards=boards))
+    return redirect(url_for('board_catalog', board_name=board_name))
 
 
 @app.route('/<board_name>/<post_id>/reply', methods=['POST'])
@@ -195,9 +220,7 @@ def reply_form(board_name, boards, post_id, ip):
         create_reply(post_id, p.text, p.img, p.user, ip)
         flash(REPLY_MSG)
 
-    return redirect(
-        url_for('board_post', board_name=board_name, boards=boards, post_id=post_id)
-    )
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
 @app.route('/<board_name>/<post_id>/<reply_id>/reply', methods=['POST'])
@@ -213,9 +236,7 @@ def reply_to_reply(board_name, boards, post_id, reply_id, ip):
         create_reply_to_reply(post_id, reply_id, p.text, p.img, p.user, ip)
         flash(REPLY_MSG)
 
-    return redirect(
-        url_for('board_post', board_name=board_name, boards=boards, post_id=post_id)
-    )
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
 @app.route('/<board_name>/<post_id>/report', methods=['POST'])
@@ -231,7 +252,7 @@ def report_post(board_name, boards, post_id, ip):
         create_report(post_id, None, category, message, ip)
         flash(REPORT_MSG)
 
-    return redirect(url_for('board_catalog', board_name=board_name, boards=boards))
+    return redirect(url_for('board_catalog', board_name=board_name))
 
 
 @app.route('/<board_name>/<post_id>/<reply_id>/report', methods=['POST'])
@@ -248,9 +269,7 @@ def report_reply(board_name, boards, post_id, reply_id, ip):
         create_report(post_id, reply_id, category, message, ip)
         flash(REPORT_MSG)
 
-    return redirect(
-        url_for('board_post', board_name=board_name, boards=boards, post_id=post_id)
-    )
+    return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
 
 if __name__ == '__main__':

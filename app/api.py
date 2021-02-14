@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from pprint import pprint
 from time import time
@@ -17,6 +17,18 @@ class Board(NamedTuple):
     board_description: str
 
 
+class PostLite(NamedTuple):
+    post_id: int
+    post_board_id: int
+    user: str
+    post: str
+    img_filename: str
+    img_uid: str
+    img_ext: str
+    date: datetime
+    ip: str
+
+
 class Post(NamedTuple):
     post_id: int
     post_board_id: int
@@ -26,6 +38,7 @@ class Post(NamedTuple):
     img_uid: str
     img_ext: str
     date: datetime
+    ip: str
     post_board_name: str
     reply_count: int
 
@@ -42,6 +55,7 @@ class Reply(NamedTuple):
     img_uid: str
     img_ext: str
     date: datetime
+    ip: str
 
 
 class Event(NamedTuple):
@@ -50,6 +64,24 @@ class Event(NamedTuple):
     last_event_date: int
     blacklisted: bool
     blacklisted_until: int
+
+
+class Report(NamedTuple):
+    report_id: int
+    post_id: int
+    reply_id: int
+    date: datetime
+    category: str
+    message: str
+    ip: str
+
+
+class Feedback(NamedTuple):
+    feedback_id: int
+    date: datetime
+    subject: str
+    message: str
+    ip: str
 
 
 def make_event(row):
@@ -75,8 +107,26 @@ def make_post(row):
             row['img_uid'],
             get_file_ext(row['img_filename']),
             make_date(row['date']),
+            row['ip'],
             row['post_board_name'],
             row['reply_count'],
+        )
+        return p
+    return None
+
+
+def make_post_lite(row):
+    if row:
+        p = PostLite(
+            row['post_id'],
+            row['post_board_id'],
+            row['user'],
+            row['post'],
+            row['img_filename'],
+            row['img_uid'],
+            get_file_ext(row['img_filename']),
+            make_date(row['date']),
+            row['ip'],
         )
         return p
     return None
@@ -104,9 +154,32 @@ def make_replies(rows):
                 r['img_uid'],
                 get_file_ext(r['img_filename']),
                 make_date(r['date']),
+                r['ip'],
             )
             replies.append(_r)
     return replies
+
+
+def make_feedback(row):
+    if row:
+        return Feedback(
+            row['feedback_id'], row['date'], row['subject'], row['message'], row['ip'],
+        )
+    return None
+
+
+def make_report(row):
+    if row:
+        return Report(
+            row['report_id'],
+            row['post_id'],
+            row['reply_id'],
+            row['date'],
+            row['category'],
+            row['message'],
+            row['ip'],
+        )
+    return None
 
 
 def get_board_names():
@@ -134,6 +207,54 @@ def get_post(post_id):
     """
     row = query_db(sql_string, args=[post_id], one=True)
     return make_post(row)
+
+
+def make_date_subtract_str(func):
+    def wrapper(*args, **kwargs):
+        kwargs['since'] = (datetime.now() - kwargs['since']).strftime('%Y-%m-%d')
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@make_date_subtract_str
+def get_posts(since):
+    sql_string = """
+        select * from post where date >= date(?) order by post_id desc;
+    """
+    rows = query_db(sql_string, args=[since])
+    posts = [make_post_lite(r) for r in rows] if rows else None
+    return posts
+
+
+@make_date_subtract_str
+def get_replies(since):
+    sql_string = """
+        select * from reply where date >= date(?) order by reply_id desc;
+    """
+    rows = query_db(sql_string, args=[since])
+    replies = make_replies(rows) if rows else None
+    return replies
+
+
+@make_date_subtract_str
+def get_feedbacks(since):
+    sql_string = """
+        select * from feedback where date >= date(?) order by feedback_id desc;
+    """
+    rows = query_db(sql_string, args=[since])
+    feedbacks = [make_feedback(row) for row in rows] if rows else None
+    return feedbacks
+
+
+@make_date_subtract_str
+def get_reports(since):
+    sql_string = """
+        select * from report where date >= date(?) order by report_id desc;
+    """
+    rows = query_db(sql_string, args=[since])
+    reports = [make_report(row) for row in rows] if rows else None
+    return reports
 
 
 def get_popular_posts(n=4):

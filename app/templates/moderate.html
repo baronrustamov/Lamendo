@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+{% import 'macros.html' as macros %}
+
+{% block body %}
+
+{% if posts %}
+  <div class="big_font bottom_padding">Posts</div>
+  {% for post in posts %}
+    <div class="reply">
+      post_id: {{ post.post_id }}<br>
+      post_board_id: {{ post.post_board_id }}<br>
+      user: {{ post.user }}<br>
+      img_filename: {{ post.img_filename }}<br>
+      img_uid: {{ post.img_uid }}<br>
+      img_ext: {{ post.img_ext }}<br>
+      date: {{ post.date }}<br>
+      {{ macros.data(post, "post") }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+{% if replies %}
+  <div class="big_font bottom_padding">Replies</div>
+  {% for reply in replies %}
+    <div class="reply">
+      reply_id: {{ reply.reply_id }}<br>
+      reply_post_id: {{ reply.reply_post_id }}<br>
+      parent_reply_id: {{ reply.parent_reply_id }}<br>
+      user: {{ reply.user }}<br>
+      img_filename: {{ reply.img_filename }}<br>
+      img_uid: {{ reply.img_uid }}<br>
+      img_ext: {{ reply.img_ext }}<br>
+      date: {{ reply.date }}<br>
+      {{ macros.data(reply, "reply") }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+{% if reports %}
+  <div class="big_font bottom_padding">Reports</div>
+  {% for report in reports %}
+    <div class="reply">
+      report_id: {{ report.report_id }}<br>
+      post_id: {{ report.post_id }}<br>
+      reply_id: {{ report.reply_id }}<br>
+      date: {{ report.date }}<br>
+      category: {{ report.category }}<br>
+      message: {{ report.message }}<br>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+{% if feedbacks %}
+  <div class="big_font bottom_padding">Feedback</div>
+  {% for feedback in feedbacks %}
+    <div class="reply">
+      feedback_id: {{ feedback.feedback_id }}<br>
+      date: {{ feedback.date }}<br>
+      subject: {{ feedback.subject }}<br>
+      message: {{ feedback.message }}<br>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+{% if events %}
+  <div class="big_font bottom_padding">Events</div>
+  {% for event in events %}
+    <div class="reply">
+      event_id: {{ event.event_id }}<br>
+      last_event_date: {{ event.last_event_date }}<br>
+      blacklisted: {{ event.blacklisted }}<br>
+      blacklisted_until: {{ event.blacklisted_until }}<br>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% endblock %}
