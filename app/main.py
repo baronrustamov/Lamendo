@@ -32,6 +32,7 @@ from config import (
     REPLY_MSG,
     REPORT_MSG,
     RULES,
+    PRODUCTION
 )
 from flask import Flask, abort, flash, redirect, render_template, request, url_for, session
 from flask_wtf.csrf import CSRFProtect
@@ -308,6 +309,6 @@ def report_reply(board_name, boards, post_id, reply_id, ip):
 
     return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
 
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+if not PRODUCTION:
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0')

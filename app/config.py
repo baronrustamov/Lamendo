@@ -1,10 +1,18 @@
 PRODUCTION = False
 
-DATABASE = 'db/lamendo.db'
-SCHEMA = 'db/schema.sql'
-INIT_DATA = 'db/data.sql'
-IMG_PATH = './static/img_uploads/'
-LOG_PATH = './logs/app.log'
+if PRODUCTION:
+    DATABASE = '/home/mphladun/lamendo/app/db/lamendo.db'
+    SCHEMA = '/home/mphladun/lamendo/app/db/schema.sql'
+    INIT_DATA = '/home/mphladun/lamendo/app/db/data.sql'
+    IMG_PATH = '/home/mphladun/lamendo/app/static/img_uploads/'
+    LOG_PATH = '/home/mphladun/lamendo/app/logs/app.log'
+else:
+    DATABASE = 'db/lamendo.db'
+    SCHEMA = 'db/schema.sql'
+    INIT_DATA = 'db/data.sql'
+    IMG_PATH = './static/img_uploads/'
+    LOG_PATH = './logs/app.log'
+  
 
 ALLOWED_FILETYPES = {'png', 'jpg', 'jpeg', 'gif'}
 MAX_MB = 3
