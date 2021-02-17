@@ -30,7 +30,7 @@
     {% if record.img_filename %}
       <div class="right_padding">
         <a href="{{url_for('static', filename='img_uploads/' + record.img_uid + '.' + record.img_ext)}}">
-          <img src="{{url_for('static', filename='img_uploads/' + record.img_uid +'.' +  record.img_ext)}}"/>
+          <img src="{{url_for('static', filename='img_uploads/' + record.img_uid +'.' +  record.img_ext)}}" alt="{{record.img_filename}}"/>
         </a>
       </div>
     {% endif %}

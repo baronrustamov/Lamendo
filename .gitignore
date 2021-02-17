@@ -2,6 +2,8 @@ __pycache__/
 
 *.db
 
+flask_session/
+
 app/static/img_uploads/
 !90210.jpg
 !all_of_us,_together.jpg

@@ -1,28 +1,25 @@
 {% import 'macros.html' as macros %}
+{% include 'report_modal.html' %}
 
 {% if posts %}
   <div class="container">
     {% for post in posts %}
     <div class="post">
+
+      {% include 'report_post_button.html' %}
       <div class="metadata">
-        <button class="metabutton" report="" report_url="/{{post.post_board_name}}/{{post.post_id}}/report">>></button>
+        Replies: {{post.reply_count}}
       </div>
-      Replies: {{post.reply_count}}
-
       <a href="{{ url_for('board_post', board_name=post.post_board_name, post_id=post.post_id) }}">
-        
-        {{ macros.post_metadata(post) }}
-
         <div class="post_img_and_caption">
           {% if post.img_filename %}
-            <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}"/>
+            <img src="{{url_for('static', filename='img_uploads/' + post.img_uid + '.' + post.img_ext)}}" alt="{{post.img_filename}}"/>
           {% endif %}
 
           {% if post %}
             <div class="formatted_text padding4">{{ post.post }}</div>
           {% endif %}
         </div>
-
       </a>
 
     </div>

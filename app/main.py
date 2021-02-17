@@ -2,7 +2,6 @@ import logging
 import os
 from datetime import datetime, timedelta
 from functools import wraps
-from werkzeug.security import generate_password_hash, check_password_hash
 
 from api import (
     create_feedback,
@@ -13,15 +12,15 @@ from api import (
     get_board_id,
     get_boards,
     get_boards_posts,
-    get_post,
+    get_feedbacks,
     get_popular_posts,
+    get_post,
     get_post_replies,
-    get_user,
-    is_valid_ip,
     get_posts,
     get_replies,
-    get_feedbacks,
     get_reports,
+    get_user,
+    is_valid_ip,
 )
 from config import (
     FEEDBACK_MSG,
@@ -29,24 +28,42 @@ from config import (
     LOG_PATH,
     MAX_FILE_SIZE,
     POST_MSG,
+    PRODUCTION,
     REPLY_MSG,
     REPORT_MSG,
     RULES,
-    PRODUCTION
 )
-from flask import Flask, abort, flash, redirect, render_template, request, url_for, session
+from flask import (
+    Flask,
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from flask_session import Session
 from flask_wtf.csrf import CSRFProtect
-from forms import FeedbackForm, PostCompiler, ReportForm, LoginForm
+from forms import FeedbackForm, LoginForm, PostCompiler, ReportForm
 from urls import URLSpace
 from utils import get_ip_from_request, upload_image
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
-app.secret_key = str(os.urandom(16))
+app.secret_key = str(os.urandom(32))
 
+# from redis import Redis
+# r = Redis(host='localhost', port=6379, db=0)
+# app.config['SESSION_REDIS'] = r
+
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=2)
+sess = Session()
+sess.init_app(app)
 
 assert os.path.isdir(IMG_PATH)
 app.config['UPLOAD_FOLDER'] = IMG_PATH
-
 
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
@@ -130,6 +147,7 @@ def home(ip):
     boards = get_boards()
     posts = get_popular_posts()
     feedback = FeedbackForm()
+    report = ReportForm()
 
     if feedback.validate_on_submit():
         subject = feedback.subject.data
@@ -139,7 +157,12 @@ def home(ip):
         return redirect(url_for('home'))
 
     return render_template(
-        'home.html', boards=boards, posts=posts, feedback_form=feedback, rules=RULES
+        'home.html',
+        boards=boards,
+        posts=posts,
+        feedback_form=feedback,
+        report_form=report,
+        rules=RULES,
     )
 
 
@@ -149,6 +172,7 @@ def login_required(fn):
         if 'logged_in' not in session:
             return redirect(url_for('login'))
         return fn(*args, **kwargs)
+
     return decorated_function
 
 
@@ -158,12 +182,14 @@ def moderate():
     days = 2
     since = timedelta(days=days)
 
+    boards = get_boards()
     posts = get_posts(since=since)
     replies = get_replies(since=since)
     reports = get_reports(since=since)
     feedbacks = get_feedbacks(since=since)
     return render_template(
         'moderate.html',
+        boards=boards,
         posts=posts,
         replies=replies,
         reports=reports,
@@ -308,6 +334,7 @@ def report_reply(board_name, boards, post_id, reply_id, ip):
         flash(REPORT_MSG)
 
     return redirect(url_for('board_post', board_name=board_name, post_id=post_id))
+
 
 if not PRODUCTION:
     if __name__ == '__main__':

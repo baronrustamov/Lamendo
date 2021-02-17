@@ -7,7 +7,7 @@ h1 {
 }
 
 .metadata{
-    background-color: rgb(49, 61, 83);
+    background-color: rgb(125, 139, 167);
     color: rgb(15, 15, 15);
     border-radius: 2px;
     padding: 3px;
@@ -29,7 +29,7 @@ body {
     background: #1d1f21;
     color: #c5c8c6;
     font-family: arial,helvetica,sans-serif;
-    font-size: 11pt;
+    font-size: 12pt;
     margin-left: 0;
     margin-right: 0;
     margin-top: 5px;
@@ -73,15 +73,34 @@ body {
     justify-content: center;
 }
 
-.close {
-    color: #111111;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+input[type=submit] {
+    margin-top: 5px;
+    font: inherit;
+    background-color: transparent;
+    cursor: pointer;
+    color: rgb(125, 139, 167);
+    padding: 5px;
+    border: 1px solid rgb(125, 139, 167);
+}
+
+button[type=submit] {
+    margin-top: 5px;
+    font: inherit;
+    background-color: transparent;
+    cursor: pointer;
+    color: rgb(125, 139, 167);
+    padding: 5px;
+    border: 1px solid rgb(125, 139, 167);
+}
+
+.option_button {
+    color: rgb(125, 139, 167) !important;
+    padding: 5px;
+    border: 1px solid rgb(125, 139, 167);
   }
   
-.close:hover,
-.close:focus {
+.option_button:hover,
+.option_button:focus {
     color: #2d3d4d;
     text-decoration: none;
     cursor: pointer;
@@ -136,15 +155,15 @@ a:visited{
 }
 
 a:hover{
-    color: rgb(68, 128, 177);
+    color: rgb(88, 159, 216);
 }
 
 .nav_link_color {
-    color: rgb(68, 128, 177);
+    color: rgb(88, 159, 216);
 }
 
 .nav_link_color:visited {
-    color: rgb(68, 128, 177);
+    color: rgb(88, 159, 216);
 }
 
 .nav_link_color:hover {
@@ -227,7 +246,7 @@ img {
     background-color : #1d1f21;
     color: #e6e6e6;
     font-family: arial,helvetica,sans-serif;
-    font-size: 10pt;
+    font-size: 12pt;
     border: 1px solid rgb(160, 160, 160);
     padding: 4px;
     display: block;

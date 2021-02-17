@@ -17,36 +17,51 @@ from config import (
 )
 from flask import current_app, flash
 from flask_wtf import FlaskForm
-from utils import get_new_uid, get_username, make_img_from_request
+from utils import get_ip_from_request, get_new_uid, get_username, make_img_from_request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from wtforms import Form, SelectField, StringField, TextAreaField, validators, PasswordField
-from utils import get_ip_from_request
+from wtforms import (
+    Form,
+    PasswordField,
+    SelectField,
+    StringField,
+    TextAreaField,
+    validators,
+)
 
 
 class FeedbackForm(FlaskForm):
     subject = StringField(
-        'Subject', [validators.Length(min=1, max=64), validators.InputRequired()]
+        label='Subject',
+        validators=[validators.Length(min=1, max=64), validators.InputRequired()],
     )
     message = TextAreaField(
-        'Message',
-        [
+        label='Message',
+        validators=[
             validators.Length(min=MIN_POST_LENGTH, max=MAX_POST_LENGTH),
             validators.InputRequired(),
         ],
+        id='feedback_form_message_id',
     )
 
 
 class ReportForm(FlaskForm):
-    category = SelectField('Category', choices=[(r, r) for r in REPORTS])
-    message = TextAreaField('Report', [validators.Length(max=MAX_POST_LENGTH),],)
+    category = SelectField(label='Category', choices=[(r, r) for r in REPORTS])
+    message = TextAreaField(
+        label='Report',
+        validators=[
+            validators.Length(max=MAX_POST_LENGTH),
+        ],
+        id='report_form_message_id',
+    )
 
 
 class LoginForm(FlaskForm):
     username = StringField(
-        'Username', [validators.Length(min=1, max=32), validators.InputRequired()]
+        label='Username',
+        validators=[validators.Length(min=1, max=32), validators.InputRequired()],
     )
-    password = PasswordField('Password', [validators.InputRequired()])
+    password = PasswordField(label='Password', validators=[validators.InputRequired()])
 
 
 class PostCompiler:

@@ -1,7 +1,9 @@
 
 <div id="report_modal" class="modal">
-  <div id="modal_close_report" class="close">&times;</div>
-  <div class="big_font bottom_padding">Report</div>
+  <div class="nav">
+    <div class="big_font bottom_padding">Report</div>
+    <div id="modal_close_report" class="option_button">Close</div>
+  </div>
   <br>
   <form id="report_form" action="" method="POST">
     <div>{{ report_form.category.label }}: {{ report_form.category(class_="modal_textarea") }}</div>

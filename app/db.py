@@ -3,8 +3,8 @@ import os
 import sqlite3
 
 from config import DATABASE, SCHEMA
-from flask import current_app, g
 from data import init_db_data
+from flask import current_app, g
 
 
 def init_db_schema():

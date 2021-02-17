@@ -6,9 +6,7 @@
 
 <div class="big_font bottom_padding">Post</div>
 <div class="reply">
-  <div class="metadata">
-    <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/report">>></button>
-  </div>
+  {% include 'report_post_button.html' %}
   {{ macros.metadata(post) }}
   <div class="metadata">
     <button class="metabutton" reply_to_post="" reply_url="/{{board_name}}/{{post.post_id}}/reply">Reply</button>
@@ -22,10 +20,11 @@
   <div class="reply">
     <div id="c{{reply.user}}">
       <div id="p{{reply.reply_id}}">
-        <div class="metadata">
-          <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/{{reply.reply_id}}/report">>></button>
-        </div>
-
+        
+        <button class="metabutton" report="" report_url="/{{board_name}}/{{post.post_id}}/{{reply.reply_id}}/report">
+          <div class="option_button">Report</div>
+        </button>
+        
         {{ macros.metadata(reply) }}
 
         <div class="metadata">

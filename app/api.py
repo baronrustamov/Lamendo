@@ -170,7 +170,11 @@ def make_replies(rows):
 def make_feedback(row):
     if row:
         return Feedback(
-            row['feedback_id'], row['date'], row['subject'], row['message'], row['ip'],
+            row['feedback_id'],
+            row['date'],
+            row['subject'],
+            row['message'],
+            row['ip'],
         )
     return None
 
@@ -363,7 +367,11 @@ def get_reply_id(reply_id):
 def get_user(username):
     sql_string = """select * from user where username = ?"""
     row = query_db(sql_string, args=[username], one=True)
-    user = User(row['user_id'], row['username'], row['password'], row['role']) if row else None
+    user = (
+        User(row['user_id'], row['username'], row['password'], row['role'])
+        if row
+        else None
+    )
     return user
 
 

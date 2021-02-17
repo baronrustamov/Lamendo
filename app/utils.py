@@ -1,5 +1,6 @@
 import os
 import re
+import uuid
 from datetime import datetime
 from time import time
 
@@ -15,7 +16,6 @@ from config import (
 from flask import current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-import uuid
 
 
 def make_none(*args):

@@ -56,5 +56,6 @@ insert into feedback(date, subject, message, ip)
 
 
 
+-- password is 'password'
 insert into user(username, password, role)
-    values ('username', 'password', 0);
+    values ('username', 'pbkdf2:sha256:150000$itzTa0ai$05c393beeca4bd81d12b6cf348b2ed0cb36c75480154b065ebcc282f27c89b03', 0);

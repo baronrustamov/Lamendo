@@ -12,7 +12,7 @@ else:
     INIT_DATA = 'db/data.sql'
     IMG_PATH = './static/img_uploads/'
     LOG_PATH = './logs/app.log'
-  
+
 
 ALLOWED_FILETYPES = {'png', 'jpg', 'jpeg', 'gif'}
 MAX_MB = 3
