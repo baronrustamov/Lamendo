@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+{% if 'logged_in' not in session %}
+  <div class="reply">
+    <h2>Login</h2>
+    <form action="" method="POST">
+      <div>{{ login_form.username.label }}: {{ login_form.username(class_="modal_textarea") }}</div>
+      <div>{{ login_form.password.label }}: {{ login_form.password(class_="modal_textarea") }}</div>
+      {% if login_form.errors %}
+        {% for field_name, field_errors in login_form.errors|dictsort if field_errors %}
+          {% for error in field_errors %}
+            <div>{{ login_form[field_name].label }}: {{ error }}</div>
+          {% endfor %}
+        {% endfor %}
+      {% endif %}
+      <button type="submit">Submit</button>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    </form>
+  </div>
+{% else %}
+  <form action="{{ url_for('logout') }}">
+    <input type="submit" value="Log out" />
+  </form>
+{% endif %}
+{% endblock %}

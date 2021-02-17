@@ -1,0 +1,14 @@
+<h2>Moderators</h2>
+
+{% if 'logged_in' not in session %}
+  <form action="{{ url_for('login') }}">
+    <input type="submit" value="Login" />
+  </form>
+{% else %}
+  <form action="{{ url_for('moderate') }}">
+    <input type="submit" value="Moderate" />
+  </form>
+  <form action="{{ url_for('logout') }}">
+    <input type="submit" value="Log out" />
+  </form>
+{% endif %}

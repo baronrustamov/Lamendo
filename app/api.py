@@ -84,6 +84,13 @@ class Feedback(NamedTuple):
     ip: str
 
 
+class User(NamedTuple):
+    user_id: int
+    username: str
+    password: str
+    role: int
+
+
 def make_event(row):
     assert isinstance(row['blacklisted'], int)
     event = Event(
@@ -353,12 +360,19 @@ def get_reply_id(reply_id):
     return reply_id
 
 
-def event_wrapper(create_func):
-    @wraps(create_func)
+def get_user(username):
+    sql_string = """select * from user where username = ?"""
+    row = query_db(sql_string, args=[username], one=True)
+    user = User(row['user_id'], row['username'], row['password'], row['role']) if row else None
+    return user
+
+
+def event_wrapper(fn):
+    @wraps(fn)
     def wrapper(*args, **kwargs):
         if PRODUCTION:
             push_event(args[-1])
-        return create_func(*args, **kwargs)
+        return fn(*args, **kwargs)
 
     return wrapper
 

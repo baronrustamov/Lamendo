@@ -3,6 +3,36 @@
 
 {% block body %}
 
+{% if reports %}
+  <div class="big_font bottom_padding">Reports</div>
+  {% for report in reports %}
+    <div class="reply">
+      report_id: {{ report.report_id }}<br>
+      post_id: {{ report.post_id }}<br>
+      reply_id: {{ report.reply_id }}<br>
+      date: {{ report.date }}<br>
+      category: {{ report.category }}<br>
+      message: {{ report.message }}<br>
+      ip: {{ report.ip }}<br>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+{% if feedbacks %}
+  <div class="big_font bottom_padding">Feedback</div>
+  {% for feedback in feedbacks %}
+    <div class="reply">
+      feedback_id: {{ feedback.feedback_id }}<br>
+      date: {{ feedback.date }}<br>
+      subject: {{ feedback.subject }}<br>
+      message: {{ feedback.message }}<br>
+      ip: {{ feedback.ip }}<br>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
 {% if posts %}
   <div class="big_font bottom_padding">Posts</div>
   {% for post in posts %}
@@ -14,6 +44,7 @@
       img_uid: {{ post.img_uid }}<br>
       img_ext: {{ post.img_ext }}<br>
       date: {{ post.date }}<br>
+      ip: {{ post.ip }}<br>
       {{ macros.data(post, "post") }}
     </div>
   {% endfor %}
@@ -32,35 +63,8 @@
       img_uid: {{ reply.img_uid }}<br>
       img_ext: {{ reply.img_ext }}<br>
       date: {{ reply.date }}<br>
+      ip: {{ reply.ip }}<br>
       {{ macros.data(reply, "reply") }}
-    </div>
-  {% endfor %}
-{% endif %}
-
-
-{% if reports %}
-  <div class="big_font bottom_padding">Reports</div>
-  {% for report in reports %}
-    <div class="reply">
-      report_id: {{ report.report_id }}<br>
-      post_id: {{ report.post_id }}<br>
-      reply_id: {{ report.reply_id }}<br>
-      date: {{ report.date }}<br>
-      category: {{ report.category }}<br>
-      message: {{ report.message }}<br>
-    </div>
-  {% endfor %}
-{% endif %}
-
-
-{% if feedbacks %}
-  <div class="big_font bottom_padding">Feedback</div>
-  {% for feedback in feedbacks %}
-    <div class="reply">
-      feedback_id: {{ feedback.feedback_id }}<br>
-      date: {{ feedback.date }}<br>
-      subject: {{ feedback.subject }}<br>
-      message: {{ feedback.message }}<br>
     </div>
   {% endfor %}
 {% endif %}

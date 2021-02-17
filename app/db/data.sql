@@ -56,5 +56,5 @@ insert into feedback(date, subject, message, ip)
 
 
 
-insert into admin(username, password, role)
-    value ('admin', 'admin', 0);
+insert into user(username, password, role)
+    value ('username', 'password', 0);

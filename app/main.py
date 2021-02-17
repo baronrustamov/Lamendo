@@ -2,8 +2,8 @@ import logging
 import os
 from datetime import datetime, timedelta
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
-import pytz
 from api import (
     create_feedback,
     create_post,
@@ -16,6 +16,7 @@ from api import (
     get_post,
     get_popular_posts,
     get_post_replies,
+    get_user,
     is_valid_ip,
     get_posts,
     get_replies,
@@ -34,7 +35,7 @@ from config import (
 )
 from flask import Flask, abort, flash, redirect, render_template, request, url_for, session
 from flask_wtf.csrf import CSRFProtect
-from forms import FeedbackForm, PostCompiler, ReportForm
+from forms import FeedbackForm, PostCompiler, ReportForm, LoginForm
 from urls import URLSpace
 from utils import get_ip_from_request, upload_image
 
@@ -100,8 +101,8 @@ def validate_ip_for_post_request(redirect_to):
     addition field for the ip address.
     """
 
-    def decorator(func):
-        @wraps(func)
+    def decorator(fn):
+        @wraps(fn)
         def wrapper(*args, **kwargs):
             ip = get_ip_from_request(request)
             kwargs['ip'] = ip
@@ -115,7 +116,7 @@ def validate_ip_for_post_request(redirect_to):
                     if 'post_id' in kwargs and redirect_to != 'board_catalog':
                         d['post_id'] = kwargs['post_id']
                     return redirect(url_for(redirect_to, **d))
-            return func(*args, **kwargs)
+            return fn(*args, **kwargs)
 
         return wrapper
 
@@ -141,9 +142,18 @@ def home(ip):
     )
 
 
+def login_required(fn):
+    @wraps(fn)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            return redirect(url_for('login'))
+        return fn(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/moderate')
-@validate_ip_for_post_request('moderate')
-def moderate(ip):
+@login_required
+def moderate():
     days = 2
     since = timedelta(days=days)
 
@@ -158,6 +168,33 @@ def moderate(ip):
         reports=reports,
         feedbacks=feedbacks,
     )
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    login_form = LoginForm()
+    msg = 'Username or password incorrect.'
+    if login_form.validate_on_submit():
+        username = login_form.username.data
+        password_candidate = login_form.password.data
+
+        user_record = get_user(username)
+        if user_record:
+            if check_password_hash(user_record.password, password_candidate):
+                session['logged_in'] = True
+                session['username'] = username
+                flash('Login successful.')
+                return redirect(url_for('moderate'))
+        flash(msg)
+    return render_template('login.html', login_form=login_form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    session.clear()
+    flash('Logged out successful.')
+    return redirect(url_for('home'))
 
 
 @app.route('/<board_name>')

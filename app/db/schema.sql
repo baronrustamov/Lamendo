@@ -47,8 +47,8 @@ create table report (
     ip text not null
 );
 
-create table admin (
-    admin_id integer primary key,
+create table user (
+    user_id integer primary key,
     username text not null,
     password text not null,
     role integer not null

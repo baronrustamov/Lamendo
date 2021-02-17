@@ -9,7 +9,7 @@
   </div>
   {% if request.path != url_for('home') %}
     {% if post %}
-    <a href="{{url_for('board_catalog', board_name=board_name)}}" class="big_font">{{board_name}} Catalog</a>
+      <a href="{{url_for('board_catalog', board_name=board_name)}}" class="big_font">{{board_name}} Catalog</a>
     {% endif %}
   {% endif %}
 </div>

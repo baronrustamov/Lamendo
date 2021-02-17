@@ -20,7 +20,7 @@ from flask_wtf import FlaskForm
 from utils import get_new_uid, get_username, make_img_from_request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from wtforms import Form, SelectField, StringField, TextAreaField, validators
+from wtforms import Form, SelectField, StringField, TextAreaField, validators, PasswordField
 from utils import get_ip_from_request
 
 
@@ -40,6 +40,13 @@ class FeedbackForm(FlaskForm):
 class ReportForm(FlaskForm):
     category = SelectField('Category', choices=[(r, r) for r in REPORTS])
     message = TextAreaField('Report', [validators.Length(max=MAX_POST_LENGTH),],)
+
+
+class LoginForm(FlaskForm):
+    username = StringField(
+        'Username', [validators.Length(min=1, max=32), validators.InputRequired()]
+    )
+    password = PasswordField('Password', [validators.InputRequired()])
 
 
 class PostCompiler:
