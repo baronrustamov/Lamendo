@@ -14,6 +14,7 @@ from api import (
     get_boards_posts,
     get_feedbacks,
     get_popular_posts,
+    get_recent_posts,
     get_post,
     get_post_replies,
     get_posts,
@@ -52,10 +53,6 @@ from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(32))
-
-# from redis import Redis
-# r = Redis(host='localhost', port=6379, db=0)
-# app.config['SESSION_REDIS'] = r
 
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=2)
@@ -145,7 +142,7 @@ def validate_ip_for_post_request(redirect_to):
 @validate_ip_for_post_request('home')
 def home(ip):
     boards = get_boards()
-    posts = get_popular_posts()
+    posts = get_recent_posts(n=6)
     feedback = FeedbackForm()
     report = ReportForm()
 

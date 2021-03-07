@@ -290,6 +290,25 @@ def get_popular_posts(n=4):
     return posts
 
 
+def get_recent_posts(n=6):
+    sql_string = """
+        select
+            post.*,
+            board.board_name post_board_name,
+            count(reply_post_id) reply_count
+        from
+            post
+            left join reply on reply.reply_post_id = post.post_id
+            left join board on board.board_id = post.post_board_id
+        group by
+            post_id
+        order by post_id desc
+        limit ?;
+    """
+    rows = query_db(sql_string, args=[n])
+    return make_posts(rows)
+
+
 def get_post_replies(post_id):
     sql_string = """
         select reply.*
@@ -330,7 +349,7 @@ def get_boards_posts(board_name):
             and post.post_id is not null
         group by
             post_id
-        order by post_id;
+        order by post_id desc;
     """
     rows = query_db(sql_string, args=[board_name])
     return make_posts(rows)
