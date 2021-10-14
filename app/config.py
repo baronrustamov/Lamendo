@@ -1,4 +1,4 @@
-PRODUCTION = False
+PRODUCTION = True
 
 if PRODUCTION:
     DATABASE = '/home/mphladun/lamendo/app/db/lamendo.db'
