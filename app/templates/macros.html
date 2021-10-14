@@ -28,21 +28,17 @@
 {% macro data(record, type) %}
   <div class="img_and_caption">
     {% if record.img_filename %}
-      <div class="right_padding">
-        <a href="{{url_for('static', filename='img_uploads/' + record.img_uid + '.' + record.img_ext)}}">
-          <img src="{{url_for('static', filename='img_uploads/' + record.img_uid +'.' +  record.img_ext)}}" alt="{{record.img_filename}}"/>
-        </a>
-      </div>
+      <a href="{{url_for('static', filename='img_uploads/' + record.img_uid + '.' + record.img_ext)}}" class="right_padding">
+        <img src="{{url_for('static', filename='img_uploads/' + record.img_uid +'.' +  record.img_ext)}}" alt="{{record.img_filename}}"/>
+      </a>
     {% endif %}
 
     {% if type == "reply" %}
-      <div>
-        {% if record.parent_reply_id and record.parent_user[0] %}
-          <a href="#p{{record.parent_reply_id}}" nav_link_color="p{{record.parent_reply_id}}" class="nav_link_color underline">{{ record.parent_user[0] }}</a>
-          <div class="preview"></div>
-        {% endif %}
-        <div class="formatted_text">{{ record.reply }}</div>
-      </div>
+      {% if record.parent_reply_id and record.parent_user[0] %}
+        <a href="#p{{record.parent_reply_id}}" nav_link_color="p{{record.parent_reply_id}}" class="nav_link_color underline">{{ record.parent_user[0] }}</a>
+        <div class="preview"></div>
+      {% endif %}
+      <div class="formatted_text">{{ record.reply }}</div>
     {% else %}
       <div class="formatted_text">{{ record.post }}</div>
     {% endif %}
